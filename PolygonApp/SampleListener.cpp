@@ -72,31 +72,30 @@ void SampleListener::onFrame(const Controller& controller) {
                 //個別の指の情報を出力する
                 printf("    finger[%d] (%6.1f,%6.1f,%6.1f)\n",
                     j, currentPosition.x , currentPosition.y, currentPosition.z);
-
             }
+
             tmpCenter = (posi0 + posi1) / 2;
             pointer = tmpCenter;
             double pick = pow(posi0.x - posi1.x, 2.0) + pow(posi0.z - posi1.z, 2.0);
+
             for (int j = 0; j < pointNUM; j++) {
-                double dist = pow(point[j].x - tmpCenter.x , 2.0) +  pow(point[j].y - tmpCenter.y, 2.0) + pow(point[j][1] + tmpCenter.z, 2.0);
-                printf("pick: %f  dist[%d]: %f\n", pick,j, dist);
+                double dist = point[j].distanceTo(tmpCenter);
+                printf("pick:%f, dist:%f\n", pick, dist);
                 if (moving == -1 || moving == j) {
-                    if (dist < 0.1 && pick < 25) {
+                    if (dist < 0.2 && pick < 25) {
+                        printf("picked!!");
                         moving = j;
                         point[j].x = tmpCenter.x;
                         point[j].y = tmpCenter.y;
-                        point[j].z = -tmpCenter.z;
+                        point[j].z = tmpCenter.z;
                         break;
                     }
                     else {
                         moving = -1;
-                    }
-                    
+                    }   
                 }
-                
-                
             }
-            printf("moving:%d", moving);
+            printf("moving:%d,pointerx:%f,pointery:%f,pointerz:%f", moving,pointer.x, pointer.y, pointer.z);
 
 
 

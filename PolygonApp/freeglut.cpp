@@ -34,7 +34,9 @@ void display(void)
 
 
     glPointSize(20);
+    
     glBegin(GL_POINTS);
+    glColor3f(1.0, 1.0, 1.0);
     glVertex3f(pointer.x, pointer.y, pointer.z );
     glEnd();
 
