@@ -32,27 +32,53 @@ void display(void)
     //glEnable(GL_LIGHT0);//光源0を利用
     //-----------------------------------
 
-/* ポリゴンの描画 1 */
+
     glPointSize(20);
     glBegin(GL_POINTS);
-    glVertex2f(point[0][0], point[0][1]);
-    glVertex2f(point[1][0], point[1][1]);
-    glVertex2f(point[2][0], point[2][1]);
-    glVertex2f(point[3][0], point[3][1]);
-    glVertex2f(point[4][0], point[4][1]);
-    glVertex2f(point[5][0], point[5][1]);
-    glVertex2f(fing[0][0], fing[0][1]);
-    glVertex2f(fing[1][0], fing[1][1]);
+    glVertex3f(pointer.x, pointer.y, pointer.z );
     glEnd();
 
-    glBegin(GL_LINE_LOOP);
-    glVertex2f(point[0][0], point[0][1]);
-    glVertex2f(point[1][0], point[1][1]);
-    glVertex2f(point[2][0], point[2][1]);
-    glVertex2f(point[3][0], point[3][1]);
-    glVertex2f(point[4][0], point[4][1]);
-    glVertex2f(point[5][0], point[5][1]);
+    /* ポリゴンの描画 CUbe */
+
+    glBegin(GL_QUADS);
+        // 上面（緑）
+    glColor3f(0.0, 1.0, 0.0);
+    glVertex3f((float)point[0].x, (float)point[0].y, (float)point[0].z); // A
+    glVertex3f(point[1].x, point[1].y, point[1].z); // B
+    glVertex3f(point[2].x, point[2].y, point[2].z); // C
+    glVertex3f(point[3].x, point[3].y, point[3].z); // D
+        // 下面（オレンジ）
+    glColor3f(1, 0.5, 0);
+    glVertex3f(point[4].x, point[4].y, point[4].z); // E
+    glVertex3f(point[5].x, point[5].y, point[5].z);// F
+    glVertex3f(point[6].x, point[6].y, point[6].z);  // G
+    glVertex3f(point[7].x, point[7].y, point[7].z);   // H
+        // 前面（赤）
+    glColor3f(1.0, 0.0, 0.0);
+    glVertex3f(point[3].x, point[3].y, point[3].z);  // D
+    glVertex3f(point[2].x, point[2].y, point[2].z);  // C
+    glVertex3f(point[6].x, point[6].y, point[6].z);  // G
+    glVertex3f(point[7].x, point[7].y, point[7].z);  // H
+        // 背面（黄色）
+    glColor3f(1.0, 1.0, 0.0);
+    glVertex3f(point[0].x, point[0].y, point[0].z);  // A
+    glVertex3f(point[1].x, point[1].y, point[1].z);  // B
+    glVertex3f(point[5].x, point[5].y, point[5].z); // F
+    glVertex3f(point[4].x, point[4].y, point[4].z);  // E
+        // 左側面（青）
+    glColor3f(0.0, 0.0, 1.0);
+    glVertex3f(point[2].x, point[2].y, point[2].z);   // C
+    glVertex3f(point[1].x, point[1].y, point[1].z);  // B
+    glVertex3f(point[5].x, point[5].y, point[5].z); // F
+    glVertex3f(point[6].x, point[6].y, point[6].z);   // G
+        // 右側面（マゼンタ）
+    glColor3f(1.0, 0.0, 1.0);
+    glVertex3f(point[3].x, point[3].y, point[3].z);     // D
+    glVertex3f(point[0].x, point[0].y, point[0].z);   // A
+    glVertex3f(point[4].x, point[4].y, point[4].z);  // E
+    glVertex3f(point[7].x, point[7].y, point[7].z);   // H
     glEnd();
+
 
 
     //陰影OFF-----------------------------
@@ -78,7 +104,7 @@ void timer(int timerID)
 
     /* オブジェクトの回転角度を1.0度ずつ増加させる */
 
-//    BoxRotate += 1;
+    BoxRotate += 1;
     if (BoxRotate > 360.0) BoxRotate -= 360.0;
 
     /* 描画要求（直後に display() 関数が呼ばれる） */

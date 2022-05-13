@@ -62,13 +62,11 @@ void SampleListener::onFrame(const Controller& controller) {
 
                 if (j == 0) {
                     posi0 = currentPosition/8;
-                    //fing[0][0] = posi0.x;
-                    //fing[0][1] = -posi0.z;
+                    posi0.y -= 30;
                 }
                 else if (j == 1) {
                     posi1 = currentPosition/8;
-                    //fing[1][0] = posi1.x;
-                    //fing[1][1] = -posi1.z;
+                    posi1.y -= 30;
                 }
 
                 //個別の指の情報を出力する
@@ -76,19 +74,18 @@ void SampleListener::onFrame(const Controller& controller) {
                     j, currentPosition.x , currentPosition.y, currentPosition.z);
 
             }
-            
             tmpCenter = (posi0 + posi1) / 2;
-            fing[0][0] = tmpCenter.x;
-            fing[0][1] = -tmpCenter.z;
+            pointer = tmpCenter;
             double pick = pow(posi0.x - posi1.x, 2.0) + pow(posi0.z - posi1.z, 2.0);
-            for (int j = 0; j < 6; j++) {
-                double dist = pow(point[j][0] - tmpCenter.x , 2.0) + pow(point[j][1] + tmpCenter.z, 2.0);
+            for (int j = 0; j < pointNUM; j++) {
+                double dist = pow(point[j].x - tmpCenter.x , 2.0) +  pow(point[j].y - tmpCenter.y, 2.0) + pow(point[j][1] + tmpCenter.z, 2.0);
                 printf("pick: %f  dist[%d]: %f\n", pick,j, dist);
                 if (moving == -1 || moving == j) {
                     if (dist < 0.1 && pick < 25) {
                         moving = j;
-                        point[j][0] = tmpCenter.x;
-                        point[j][1] = -tmpCenter.z;
+                        point[j].x = tmpCenter.x;
+                        point[j].y = tmpCenter.y;
+                        point[j].z = -tmpCenter.z;
                         break;
                     }
                     else {

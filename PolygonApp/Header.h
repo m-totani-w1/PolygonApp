@@ -25,7 +25,8 @@ extern float CameraY;            /* カメラの位置（Y座標） */
 extern float CameraZ;            /* カメラの位置（Z座標） */
 extern float BoxRotate;          /* 箱の回転角 */
 
-extern float point[6][2];
-extern float fing[2][2];
+extern const int pointNUM;
+extern Vector point[8];
+extern Vector pointer;
 
 extern int moving;
