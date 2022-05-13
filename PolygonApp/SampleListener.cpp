@@ -2,7 +2,7 @@
 #include "Header.h"
 #include "SampleListener.h"
 
-using namespace Leap;
+using namespace Leap; 
 /***********LeapMotionの処理***************/
 
 void SampleListener::onInit(const Controller& controller) {
