@@ -28,3 +28,4 @@ extern float BoxRotate;          /* 箱の回転角 */
 extern float point[6][2];
 extern float fing[2][2];
 
+extern int moving;

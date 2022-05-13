@@ -51,9 +51,6 @@ void SampleListener::onFrame(const Controller& controller) {
             Vector posi0, posi1;
             Vector tmpCenter = { 0,0,0 };
 
-            point[5][0] = handCenter.x/8;
-            point[5][1] = handCenter.z/8;
-
 
             //個別の手の情報を出力する
             printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
@@ -62,18 +59,16 @@ void SampleListener::onFrame(const Controller& controller) {
                 Finger finger = fingerList[j];
                 Vector currentPosition = finger.tipPosition();
 
-                point[j][0] = currentPosition.x/8;
-                point[j][1] = currentPosition.z/8;
 
                 if (j == 0) {
-                    posi0 = currentPosition;
-                    fing[0][0] = posi0.x / 5;
-                    fing[0][1] = posi0.y / 5 - 30;
+                    posi0 = currentPosition/8;
+                    //fing[0][0] = posi0.x;
+                    //fing[0][1] = -posi0.z;
                 }
                 else if (j == 1) {
-                    posi1 = currentPosition;
-                    fing[1][0] = posi1.x / 5;
-                    fing[1][1] = posi1.y / 5 - 30;
+                    posi1 = currentPosition/8;
+                    //fing[1][0] = posi1.x;
+                    //fing[1][1] = -posi1.z;
                 }
 
                 //個別の指の情報を出力する
@@ -82,16 +77,29 @@ void SampleListener::onFrame(const Controller& controller) {
 
             }
             
-            //tmpCenter = (posi0 + posi1) / 2;
-            //for (int j = 0; j < 5; j++) {
-            //    double pick = pow(posi0.x - posi1.x, 2.0) + pow(posi0.y - posi1.y, 2.0);
-            //    double dist = pow(point[j][0] - tmpCenter.x / 5, 2.0) + pow(point[j][1] - tmpCenter.y / 5 - 30, 2.0);
-            //    printf("pick: %f  dist: %f\n", pick, dist);
-            //    if (dist < 1000 && pick < 300) {
-            //        point[j][0] = tmpCenter.x / 5;
-            //        point[j][1] = tmpCenter.y / 5 - 30;
-            //    }
-            //}
+            tmpCenter = (posi0 + posi1) / 2;
+            fing[0][0] = tmpCenter.x;
+            fing[0][1] = -tmpCenter.z;
+            double pick = pow(posi0.x - posi1.x, 2.0) + pow(posi0.z - posi1.z, 2.0);
+            for (int j = 0; j < 6; j++) {
+                double dist = pow(point[j][0] - tmpCenter.x , 2.0) + pow(point[j][1] + tmpCenter.z, 2.0);
+                printf("pick: %f  dist[%d]: %f\n", pick,j, dist);
+                if (moving == -1 || moving == j) {
+                    if (dist < 0.1 && pick < 25) {
+                        moving = j;
+                        point[j][0] = tmpCenter.x;
+                        point[j][1] = -tmpCenter.z;
+                        break;
+                    }
+                    else {
+                        moving = -1;
+                    }
+                    
+                }
+                
+                
+            }
+            printf("moving:%d", moving);
 
 
 

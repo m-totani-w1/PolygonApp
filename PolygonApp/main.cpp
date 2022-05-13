@@ -30,7 +30,7 @@ float BoxRotate = 0.0;          /* 箱の回転角 */
 float point[6][2] = { {0,5},{-4,3},{-4,-3},{0,-5},{4,-3},{4,3} };
 float fing[2][2] = { {100,100},{100,100} };
 
-bool flag = true;
+int moving = -1;
 
 //必要だろうか。。。？
 Controller controller;
