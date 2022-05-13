@@ -41,7 +41,7 @@ void display(void)
     glVertex2f(point[3][0], point[3][1]);
     glVertex2f(point[4][0], point[4][1]);
     glVertex2f(point[5][0], point[5][1]);
-    //glVertex2f(fing[0][0], fing[0][1]);
+    glVertex2f(fing[0][0], fing[0][1]);
     //glVertex2f(fing[1][0], fing[1][1]);
     glEnd();
 
