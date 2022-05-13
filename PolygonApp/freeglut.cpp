@@ -45,6 +45,7 @@ void display(void)
     glVertex2f(fing[1][0], fing[1][1]);
     glEnd();
 
+    glLineWidth(5);
     glBegin(GL_LINE_LOOP);
     glVertex2f(point[0][0], point[0][1]);
     glVertex2f(point[1][0], point[1][1]);
