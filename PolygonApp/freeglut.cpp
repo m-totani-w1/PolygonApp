@@ -39,7 +39,10 @@ void display(void)
     glColor3f(1.0, 1.0, 1.0);
     glVertex3f(pointer.x, pointer.y, pointer.z );
     glEnd();
-
+    
+    
+    printf("R:%f,p01:%f\n", BoxRotate,point[0].x);
+   
     /* ポリゴンの描画 CUbe */
 
     glBegin(GL_QUADS);
@@ -105,8 +108,9 @@ void timer(int timerID)
     glutTimerFunc(15, timer, 0);
 
     /* オブジェクトの回転角度を1.0度ずつ増加させる */
-
-    BoxRotate += 1;
+    //BoxRotate += 1;
+    
+    
     if (BoxRotate > 360.0) BoxRotate -= 360.0;
 
     /* 描画要求（直後に display() 関数が呼ばれる） */
@@ -242,7 +246,7 @@ void myInit(char* windowTitle)
     glClearColor(0.0, 0.0, 0.0, 1.0);              /* 画面消去色の設定 */
 
     //光源の設定--------------------------------------
-    GLfloat light_position0[] = { CameraX, CameraY + 5, CameraZ, 1.0 }; //光源0の座標
+    GLfloat light_position0[] = { CameraX, CameraY-1, CameraZ+1, 1.0 }; //光源0の座標
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0); //光源0を
 
     /* イベント発生時に呼び出す関数の登録 */

@@ -28,5 +28,8 @@ extern float BoxRotate;          /* 箱の回転角 */
 extern const int pointNUM;
 extern Vector point[8];
 extern Vector pointer;
+extern Vector rotateStart;
+extern Vector rotateEnd;
 
-extern int moving;
+extern int movingFlag;
+extern int rotatingFlag;

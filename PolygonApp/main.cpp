@@ -30,8 +30,12 @@ float BoxRotate = 0.0;          /* 箱の回転角 */
 const int pointNUM = 8;
 Vector point[8] = { {-3,3,-3},{3,3,-3},{3,3,3},{-3,3,3},{-3,-3,-3},{3,-3,-3},{3,-3,3},{-3,-3,3} };
 Vector pointer = { 100,100,100 };
+Vector rotateStart = { 0,0,0 };
+Vector rotateEnd = { 0,-999,0 };
 
-int moving = -1;
+
+int movingFlag = -1;
+int rotatingFlag = -1;
 
 //必要だろうか。。。？
 Controller controller;
