@@ -180,7 +180,10 @@ void SampleListener::onFrame(const Controller& controller) {
                     }
                 }
             }
-            rotateStart = rotateEnd;
+            if (hand.isRight()) {
+                rotateStart = rotateEnd;
+            }
+            
             }
 
         //ジェスチャーの処理
