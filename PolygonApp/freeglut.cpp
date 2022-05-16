@@ -52,11 +52,11 @@ void display(void)
             glColor3f(0, (i+j+1)%2, (i + j) % 2);
             glVertex3f(point[i][j].x, point[i][j].y, point[i][j].z);
             glVertex3f(point[i+1][j].x, point[i+1][j].y, point[i+1][j].z);
-            glVertex3f(point[i+1][j+1].x, point[i+1][j+1].y, point[i+1][j+1].z);
-            glVertex3f(point[i][j+1].x, point[i][j+1].y, point[i][j+1].z);
+            glVertex3f(point[i+1][(j+1)%longitudeNUM].x, point[i+1][(j + 1) % longitudeNUM].y, point[i+1][(j + 1) % longitudeNUM].z);
+            glVertex3f(point[i][(j + 1) % longitudeNUM].x, point[i][(j + 1) % longitudeNUM].y, point[i][(j + 1) % longitudeNUM].z);
         }
     }
-    for (int j = 0; j < longitudeNUM+1; j++) {
+    for (int j = 0; j < longitudeNUM; j++) {
         glColor3f(0, (j+1 ) % 2, (j) % 2);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[1][j].x, point[1][j].y, point[1][j].z);
@@ -241,7 +241,7 @@ void InitPoint() {
     for (int i = 1; i < latitudeNUM;i++) {
         theta += Dtheta;
         omega = 0;
-        for (int j = 0; j < longitudeNUM+1; j++) {
+        for (int j = 0; j < longitudeNUM; j++) {
             printf("omega:%f  theta:%f\n", omega/PI, theta/PI);
             point[i][j].x = R * cos(theta) * cos(omega);
             point[i][j].y = R * sin(theta);
