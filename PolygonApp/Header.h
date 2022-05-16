@@ -25,8 +25,11 @@ extern float CameraY;            /* カメラの位置（Y座標） */
 extern float CameraZ;            /* カメラの位置（Z座標） */
 extern float BoxRotate;          /* 箱の回転角 */
 
-extern const int pointNUM;
-extern Vector point[8];
+extern const int latitudeNUM;
+extern const int longitudeNUM;
+extern Vector point[13][19];
+extern const int R;
+extern Vector pole[2];
 extern Vector pointer;
 extern Vector rotateStart;
 extern Vector rotateEnd;

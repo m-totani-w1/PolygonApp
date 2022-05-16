@@ -21,14 +21,17 @@ int   yBegin = 0;               /* マウスドラッグの始点Y座標 */
 int   PressButton = 0;          /* 現在押されているマウスボタン（1:左,2:中,3:右） */
 float CameraAzimuth = 90.0;   /* カメラの位置（方位角） */
 float CameraElevation = 0.0;    /* カメラの位置（仰角） */
-float CameraDistance = 15.0;    /* カメラの位置（原点からの距離） */
+float CameraDistance = 16.0;    /* カメラの位置（原点からの距離） */
 float CameraX = 0.0;            /* カメラの位置（X座標） */
 float CameraY = 0.0;            /* カメラの位置（Y座標） */
-float CameraZ = 15.0;            /* カメラの位置（Z座標） */
+float CameraZ = 18.0;            /* カメラの位置（Z座標） */
 float BoxRotate = 0.0;          /* 箱の回転角 */
 
-const int pointNUM = 8;
-Vector point[8] = { {-3,3,-3},{3,3,-3},{3,3,3},{-3,3,3},{-3,-3,-3},{3,-3,-3},{3,-3,3},{-3,-3,3} };
+const int latitudeNUM = 12;
+const int longitudeNUM = 18;
+const int R = 6;
+Vector point[13][19] = {};
+Vector pole[2] = {};
 Vector pointer = { 100,100,100 };
 Vector rotateStart = { 0,0,0 };
 Vector rotateEnd = { 0,-999,0 };
@@ -58,6 +61,7 @@ int main(int argc, char** argv)
 
     /* 初期化 */
     glutInit(&argc, argv);  /* OpenGL の初期化 */
+    InitPoint();
     myInit(argv[0]);        /* ウインドウ表示と描画設定の初期化 */
 
     /* イベント処理ループ */

@@ -41,47 +41,34 @@ void display(void)
     glEnd();
     
     
-    printf("R:%f,p01:%f\n", BoxRotate,point[0].x);
    
     /* ポリゴンの描画 CUbe */
 
     glBegin(GL_QUADS);
-        // 上面（緑）
-    glColor3f(0.0, 1.0, 0.0);
-    glVertex3f((float)point[0].x, (float)point[0].y, (float)point[0].z); // A
-    glVertex3f(point[1].x, point[1].y, point[1].z); // B
-    glVertex3f(point[2].x, point[2].y, point[2].z); // C
-    glVertex3f(point[3].x, point[3].y, point[3].z); // D
-        // 下面（オレンジ）
-    glColor3f(1, 0.5, 0);
-    glVertex3f(point[4].x, point[4].y, point[4].z); // E
-    glVertex3f(point[5].x, point[5].y, point[5].z);// F
-    glVertex3f(point[6].x, point[6].y, point[6].z);  // G
-    glVertex3f(point[7].x, point[7].y, point[7].z);   // H
-        // 前面（赤）
-    glColor3f(1.0, 0.0, 0.0);
-    glVertex3f(point[3].x, point[3].y, point[3].z);  // D
-    glVertex3f(point[2].x, point[2].y, point[2].z);  // C
-    glVertex3f(point[6].x, point[6].y, point[6].z);  // G
-    glVertex3f(point[7].x, point[7].y, point[7].z);  // H
-        // 背面（黄色）
-    glColor3f(1.0, 1.0, 0.0);
-    glVertex3f(point[0].x, point[0].y, point[0].z);  // A
-    glVertex3f(point[1].x, point[1].y, point[1].z);  // B
-    glVertex3f(point[5].x, point[5].y, point[5].z); // F
-    glVertex3f(point[4].x, point[4].y, point[4].z);  // E
-        // 左側面（青）
-    glColor3f(0.0, 0.0, 1.0);
-    glVertex3f(point[2].x, point[2].y, point[2].z);   // C
-    glVertex3f(point[1].x, point[1].y, point[1].z);  // B
-    glVertex3f(point[5].x, point[5].y, point[5].z); // F
-    glVertex3f(point[6].x, point[6].y, point[6].z);   // G
-        // 右側面（マゼンタ）
-    glColor3f(1.0, 0.0, 1.0);
-    glVertex3f(point[3].x, point[3].y, point[3].z);     // D
-    glVertex3f(point[0].x, point[0].y, point[0].z);   // A
-    glVertex3f(point[4].x, point[4].y, point[4].z);  // E
-    glVertex3f(point[7].x, point[7].y, point[7].z);   // H
+   
+    for (int i = 1; i < latitudeNUM-1; i++) {
+        
+        for (int j = 0; j < longitudeNUM ; j++) {
+            glColor3f(0, (i+j+1)%2, (i + j) % 2);
+            glVertex3f(point[i][j].x, point[i][j].y, point[i][j].z);
+            glVertex3f(point[i+1][j].x, point[i+1][j].y, point[i+1][j].z);
+            glVertex3f(point[i+1][j+1].x, point[i+1][j+1].y, point[i+1][j+1].z);
+            glVertex3f(point[i][j+1].x, point[i][j+1].y, point[i][j+1].z);
+        }
+    }
+    for (int j = 0; j < longitudeNUM+1; j++) {
+        glColor3f(0, (j+1 ) % 2, (j) % 2);
+        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+        glVertex3f(point[1][j].x, point[1][j].y, point[1][j].z);
+        glVertex3f(point[1][(j+1)% longitudeNUM].x, point[1][(j + 1) % longitudeNUM].y, point[1][(j + 1) % longitudeNUM].z);
+        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+        glColor3f(0, (latitudeNUM + j ) % 2, (latitudeNUM + j+1) % 2);
+        glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
+        glVertex3f(point[latitudeNUM-1][j].x, point[latitudeNUM-1][j].y, point[latitudeNUM-1][j].z);
+        glVertex3f(point[latitudeNUM-1][(j + 1) % longitudeNUM].x, point[latitudeNUM-1][(j + 1) % longitudeNUM].y, point[latitudeNUM-1][(j + 1) % longitudeNUM].z);
+        glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
+    }
+   
     glEnd();
 
 
@@ -224,6 +211,47 @@ void mouseDrag(int x, int y)
 }
 
 
+/*********************************************************
+|
+|球の頂点を計算
+|
+**********************************************************/
+
+void InitPoint() {
+    double theta = -PI / 2;
+    double omega = 0;
+    double Dtheta = -PI / latitudeNUM;
+    double Domega = -2 * PI / longitudeNUM;
+
+    /* 二つの極の座標 */
+    theta = -PI / 2;
+    omega = 0;
+    point[0][0].x = R * cos(theta) * cos(omega);
+    point[0][0].y = R * sin(theta);
+    point[0][0].z = R * cos(theta) * sin(omega);
+    printf("pole[0](x:%2.4f,y:%2.4f,z:%2.4f)\n", pole[0].x, pole[0].y, pole[0].z);
+    theta = PI / 2;
+    omega = 0;
+    point[latitudeNUM][0].x = R * cos(theta) * cos(omega);
+    point[latitudeNUM][0].y = R * sin(theta);
+    point[latitudeNUM][0].z = R * cos(theta) * sin(omega);
+    printf("pole[1](x:%2.4f,y:%2.4f,z:%2.4f)\n", pole[1].x, pole[1].y, pole[1].z);
+
+    theta = -PI / 2;
+    for (int i = 1; i < latitudeNUM;i++) {
+        theta += Dtheta;
+        omega = 0;
+        for (int j = 0; j < longitudeNUM+1; j++) {
+            printf("omega:%f  theta:%f\n", omega/PI, theta/PI);
+            point[i][j].x = R * cos(theta) * cos(omega);
+            point[i][j].y = R * sin(theta);
+            point[i][j].z = R * cos(theta) * sin(omega);
+            printf("point[%d][%d](x:%2.4f,y:%2.4f,z:%2.4f)\n",i,j, point[i][j].x, point[i][j].y, point[i][j].z);
+            omega += Domega;
+        }
+        
+    }
+}
 /***********************************************************
 |  関数：myInit()
 |  説明：ウインドウ表示と描画設定の初期化
