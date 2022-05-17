@@ -31,6 +31,7 @@ const int latitudeNUM = 12;
 const int longitudeNUM = 18;
 const int R = 6;
 Vector point[13][19] = {};
+Vector prePoint[13][19] = {};
 Vector pole[2] = {};
 Vector pointer = { 100,100,100 };
 Vector rotateStart = { 0,0,0 };
@@ -39,6 +40,7 @@ Vector rotateEnd = { 0,-999,0 };
 
 int movingFlag = -1;
 int rotatingFlag = -1;
+int scalingFlag = -1;
 
 //必要だろうか。。。？
 Controller controller;

@@ -28,6 +28,7 @@ extern float BoxRotate;          /* 箱の回転角 */
 extern const int latitudeNUM;
 extern const int longitudeNUM;
 extern Vector point[13][19];
+extern Vector prePoint[13][19];
 extern const int R;
 extern Vector pole[2];
 extern Vector pointer;
@@ -36,3 +37,4 @@ extern Vector rotateEnd;
 
 extern int movingFlag;
 extern int rotatingFlag;
+extern int scalingFlag;
