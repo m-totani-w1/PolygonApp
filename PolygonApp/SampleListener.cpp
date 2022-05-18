@@ -1,6 +1,9 @@
+
+#include <windows.h>
 #include "Leap.h"
 #include "Header.h"
 #include "SampleListener.h"
+#include "initializePolygon.h"
 
 using namespace Leap;
 /***********LeapMotionの処理***************/
@@ -110,9 +113,10 @@ void SampleListener::onFrame(const Controller& controller) {
                 for (int j = 0; j < pointRowNum + 1; j++) {
                     for (int k = 0; k < pointColNum + 1; k++) {
                         double dist = point[j][k].distanceTo(pointer);
-                        if (movingFlag == -1 || movingFlag == j * 100 + k) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
+                        
+                        if (rotatingFlag == -1 && movingFlag == -1 || movingFlag == j * 100 + k) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
                             if (dist < 1 && pick < 4) {
-                                printf("picked!!\n");
+                                if (movingFlag == -1) { printf("Transform Start!!\n"); }
                                 movingFlag = j * 100 + k;
 
 
@@ -128,7 +132,7 @@ void SampleListener::onFrame(const Controller& controller) {
                                     /* 摘まんだ点の周辺も動かす */
                                     double TFrate;
                                     TFrate = point[j][k].distanceTo(prePoint[j][k]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
-                                    if (j == 0 || j == pointRowNum) {   /* 摘まんだ点がpoleだった時 */
+                                    if (j == 0 || j == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
                                         int lati1 = (j == 0) ? (1) : (latitudeNUM - 1);
                                         int lati2 = (j == 0) ? (2) : (latitudeNUM - 2);
                                         int lati3 = (j == 0) ? (3) : (latitudeNUM - 3);
@@ -143,18 +147,17 @@ void SampleListener::onFrame(const Controller& controller) {
                                         for (int l = -3; l <= 3; l++) {
                                             if (0 < j + l && j + l < latitudeNUM) {
                                                 for (int m = -3; m <= 3; m++) {
-                                                    if (0 < k + m && k + m < longitudeNUM) {
-                                                        if (l != 0 || m != 0) {
-                                                            if (abs(l) == 3 || abs(m) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
-                                                                point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * 0.06 * (abs(TFrate) / 6);
-                                                            }
-                                                            else if (abs(l) == 2 || abs(m) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
-                                                                point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * 0.26 * (abs(TFrate) / 6);
-                                                            }
-                                                            else {  //頂点の周辺の動き（＊頂点の隣）
-                                                                point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * 0.6 * (abs(TFrate) / 6);
-                                                            }
+                                                    if (l != 0 || m != 0) {
+                                                        if (abs(l) == 3 || abs(m) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
+                                                            point[j + l][(k + m + longitudeNUM) % longitudeNUM] = prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM] + (point[j][k] - prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM]) * 0.06 * (abs(TFrate) / 6);
                                                         }
+                                                        else if (abs(l) == 2 || abs(m) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
+                                                            point[j + l][(k + m + longitudeNUM) % longitudeNUM] = prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM] + (point[j][k] - prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM]) * 0.26 * (abs(TFrate) / 6);
+                                                        }
+                                                        else {  //頂点の周辺の動き（＊頂点の隣）
+                                                            point[j + l][(k + m + longitudeNUM) % longitudeNUM] = prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM] + (point[j][k] - prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM]) * 0.6 * (abs(TFrate) / 6);
+                                                        }
+                                                       
                                                     }
                                                 }
                                             }
@@ -169,6 +172,8 @@ void SampleListener::onFrame(const Controller& controller) {
 
                                 case hexagon:
                                     break;
+                                default:
+                                        break;
 
                                 }
 
@@ -176,6 +181,7 @@ void SampleListener::onFrame(const Controller& controller) {
                                 break;
                             }
                             else {
+                                if (movingFlag == 0) { printf("Transform Finished!!!\n"); }
                                 movingFlag = -1;
                             }
                         }
@@ -187,20 +193,20 @@ void SampleListener::onFrame(const Controller& controller) {
             * 回転
             ************************************/
 
-            if(hand.isRight()) {
+            if (hand.isRight()) {
                 rotateStart = (rotateNow.y == 999) ? Center : rotateStart;
                 rotateNow = Center;
-                for (int j = 0; j < pointRowNum + 1; j++) {
-                    for (int k = 0; k < pointColNum + 1; k++) {
-                        if (pick < 4) {
-                            printf("%d\n\n", j);
-
+                if (movingFlag == -1 && pick < 4 || rotatingFlag == 1) {
+                    if (rotatingFlag == -1 ) { printf("Rotation Start!!!\n"); }
+                    rotatingFlag = 1;
+                    for (int j = 0; j < pointRowNum; j++) {
+                        for (int k = 0; k < pointColNum; k++) {
                             /* 移動量を計算する */
                             Vector Move = rotateNow - rotateStart;
 
 
                             ////* x軸周りに回転 *////
-                            double RotateX = atan(point[j][k].y / abs(point[j][k].z));    /* 頂点の位置（x軸周りの角度） */
+                            double RotateX = (point[j][k].z == 0) ? PI / 2 * sign(point[j][k].y) : atan((point[j][k].y / abs(point[j][k].z)));    /* 頂点の位置（x軸周りの角度） */
                             int ZMark = (point[j][k].z < 0) ? -1 : 1;     /* zの正負 */
                             double XDistance = (double)pow(point[j][k].y * point[j][k].y + point[j][k].z * point[j][k].z, 0.5);     /* x軸までの距離 */
 
@@ -210,6 +216,7 @@ void SampleListener::onFrame(const Controller& controller) {
                             Vector XMoment = -XAxisPerpendicular.cross(XMove);
                             RotateX += (ZMark < 0) ? -0.02 * XMoment.x : 0.02 * XMoment.x;
 
+                            
                             /* 回転させる */
                             point[j][k].y = XDistance * sin(RotateX);
                             point[j][k].z = XDistance * cos(RotateX) * ZMark;
@@ -217,7 +224,7 @@ void SampleListener::onFrame(const Controller& controller) {
 
 
                             ////* y軸周りに回転 *////
-                            double RotateY = atan(point[j][k].z / abs(point[j][k].x));    /* 頂点の位置（y軸周りの角度） */
+                            double RotateY = (point[j][k].x == 0) ? PI / 2 * sign(point[j][k].x) : atan((point[j][k].z / abs(point[j][k].x)));    /* 頂点の位置（y軸周りの角度） */
                             int XMark = (point[j][k].x < 0) ? -1 : 1;     /* ⅹの正負 */
                             double YDistance = (double)pow(point[j][k].z * point[j][k].z + point[j][k].x * point[j][k].x, 0.5);     /* y軸までの距離 */
 
@@ -234,7 +241,7 @@ void SampleListener::onFrame(const Controller& controller) {
 
 
                             ////* z軸周りに回転 *////
-                            double RotateZ = atan(point[j][k].x / abs(point[j][k].y));    /* 頂点の位置（z軸周りの角度） */
+                            double RotateZ = (point[j][k].y == 0) ? PI / 2 * sign(point[j][k].y) : atan((point[j][k].x / abs(point[j][k].y)));    /* 頂点の位置（z軸周りの角度） */
                             int YMark = (point[j][k].y < 0) ? -1 : 1;     /* yの正負 */
                             double ZDistance = (double)pow(point[j][k].x * point[j][k].x + point[j][k].y * point[j][k].y, 0.5);     /* z軸までの距離 */
 
@@ -245,19 +252,26 @@ void SampleListener::onFrame(const Controller& controller) {
                             RotateZ += (YMark < 0) ? 0.02 * ZMoment.z : -0.02 * ZMoment.z;
 
                             /* 回転させる */
-                            /*
+
                             point[j][k].x = ZDistance * sin(RotateZ);
                             point[j][k].y = ZDistance * cos(RotateZ) * YMark;
-                            */
 
 
 
+                            if (j == 0 && k == 0) {
 
-                            printf("PRE Rotate X:%.1f, Y:%.1f, Z:%.1f x,y,z= %.1f, %.1f, %.1f,  start:%f  end:%f\n",
-                                RotateX, RotateY, RotateZ, point[j][k].x, point[j][k].y, point[j][k].z, rotateStart.y, rotateNow.y);
+                                printf("Rotate X:%.1f, Y:%.1f, Z:%.1f\n", XMoment.x, XMoment.y, XMoment.z);
+                                printf("Rotate X:%.1f, Y:%.1f, Z:%.1f\n", YMoment.x, YMoment.y, YMoment.z);
+                                printf("Rotate X:%.1f, Y:%.1f, Z:%.1f\n\n", ZMoment.x, ZMoment.y, ZMoment.z);
+                            }
+
 
                         }
                     }
+                }
+                if (pick >= 4 && rotatingFlag == 1) {
+                    rotatingFlag = -1;
+                    printf("Rotation Finished!!\n");
                 }
                 /* 次回の回転用に更新 */
                 if (hand.isRight()) {
@@ -274,47 +288,133 @@ void SampleListener::onFrame(const Controller& controller) {
         /*************************************************
         *両手で行う操作（拡大縮小）
         ************************************************/
-
-        /******************************
-        *拡大縮小
-        *********************************/
         if (handList.count() == 2) {
             Hand handR = (handList[0].isRight()) ? handList[0] : handList[1];
-            Hand handL = (handList[0].isLeft() ) ? handList[0] : handList[1];
+            Hand handL = (handList[0].isLeft()) ? handList[0] : handList[1];
             FingerList RfingerList = handR.fingers();
             FingerList LfingerList = handL.fingers();
-            Finger Rfinger = RfingerList[1];
-            Finger Lfinger = LfingerList[1];
-            Finger Rfinger2 = RfingerList[0];
-            Finger Lfinger2 = LfingerList[0];
-            Vector Rposi = Rfinger.tipPosition()/8;
-            Vector Lposi = Lfinger.tipPosition()/8;
-            Vector Rposi2 = Rfinger2.tipPosition()/8;
-            Vector Lposi2 = Lfinger2.tipPosition()/8;
-            double dist = Rposi.distanceTo(Lposi);
+
+            Vector Rposi0 = RfingerList[0].tipPosition() / 8;       //右親指
+            Vector Lposi0 = LfingerList[0].tipPosition() / 8;       //左親指
+            Vector Rposi1 = RfingerList[1].tipPosition() / 8;       //右人差し指
+            Vector Lposi1 = LfingerList[1].tipPosition() / 8;       //左人差し指
+            Vector Rposi2 = RfingerList[2].tipPosition() / 8;       //右中指
+            Vector Lposi2 = LfingerList[2].tipPosition() / 8;       //左中指
+            Vector Rposi3 = RfingerList[3].tipPosition() / 8;       //右薬指
+            Vector Lposi3 = LfingerList[3].tipPosition() / 8;       //左薬指
+            Vector Rposi4 = RfingerList[4].tipPosition() / 8;       //右小指
+            Vector Lposi4 = LfingerList[4].tipPosition() / 8;       //左小指
+
+            /******************************
+        *拡大縮小
+        *********************************/
             
+
+            double scale = Rposi1.distanceTo(Lposi1);    //右人差し指と左人差し指の距離
             /* 「手のひらを合わせた」かつ「頂点を動かしていない」かつ「回転してない」時に大きさを調整 */
-            if (dist <  4 && movingFlag == -1 && rotatingFlag == -1 || scalingFlag == 1) {
+            if (scale < 4 && movingFlag == -1 && rotatingFlag == -1 || scalingFlag == 1) {
+                if (scalingFlag == -1) printf("scaling start!!!\n");
                 movingFlag = -2;
-                rotatingFlag - 2;
+                rotatingFlag=  - 2;
                 scalingFlag = 1;
+
+
                 
-                
-                for (int i = 0; i < latitudeNUM + 1; i++) {
-                    for (int j = 0; j < longitudeNUM; j++) {
-                        point[i][j] = prePoint[i][j] * 0.1 *dist;
+
+                for (int i = 0; i < pointRowNum; i++) {
+                    for (int j = 0; j < pointColNum; j++) {
+                        point[i][j] = prePoint[i][j] * 0.1 * scale;
                     }
                 }
-                printf("%f\n", 0.1 * dist);
-                double finishR = Rposi2.distanceTo(Rposi);
-                double finishL = Lposi2.distanceTo(Lposi);
-                if (finishR < 5 || finishL < 5) {
+                printf("magnification：%f\n", 0.1 * scale);
+
+                double finishR = Rposi1.distanceTo(Rposi0);     //右人差し指と右親指の距離
+                double finishL = Lposi1.distanceTo(Lposi0);     //左人差し指と左親指の距離
+                if (finishR < 4 || finishL < 4) {      //摘まむしぐさでスケーリング終了
+                    movingFlag = -1;
+                    rotatingFlag = -1;
+                    scalingFlag = -1;
+                    printf("scaling finished!\n");
+                }
+            }
+            
+
+            /******************************
+            * 初期化
+            **********************************/
+            /* 手が重なると、正常に動かないので二次元の距離を考える */
+            Rposi3.z = Lposi1.z;
+            Lposi3.z = Rposi1.z;
+
+
+            double init[2] = { Rposi1.distanceTo(Lposi3),Lposi1.distanceTo(Rposi3) };//人差し指と薬指の距離
+
+            if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) { //どの操作もしていないなら
+                
+                if (init[0] < 4 || init[1] < 4) {   //薬指と人差し指が近づいたら
+                    printf("initialize!!!");
+                    movingFlag = -3;
+                    rotatingFlag = -3;
+                    scalingFlag = -3;
+                    switch (shape)
+                    {
+                    case ball:
+                        InitBall();
+                        break;
+                    case cube:
+                        InitCube();
+                        break;
+                    case hexagon:
+                        InitHexagon();
+                        break;
+                    default:
+                        break;
+                    }
+                    Sleep(800);
+                    movingFlag = -1;
+                    rotatingFlag = -1;
+                    scalingFlag = -1;
+                }
+            }
+
+            /******************************
+            * ポリゴン切替
+            **********************************/
+            /* 手が重なると、正常に動かないので二次元の距離を考える */
+            Rposi4.z = Lposi1.z;
+            Lposi4.z = Rposi1.z;
+
+            double swichPolygon[2] = { Rposi1.distanceTo(Lposi4),Lposi1.distanceTo(Rposi4) };//人差し指と薬指の距離
+
+            if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) { //どの操作もしていないなら
+                if (swichPolygon[0] < 4 || swichPolygon[1] < 4) {   //薬指と人差し指が近づいたら
+                    printf("switch!!!");
+                    movingFlag = -1;
+                    rotatingFlag = -1;
+                    scalingFlag = -1;
+                    switch (shape)
+                    {
+                    case ball:
+                        InitCube();
+                        break;
+                    case cube:
+                        InitHexagon();
+                        break;
+                    case hexagon:
+                        InitBall();
+                        break;
+                    default:
+                        break;
+                    }
+                    Sleep(800);
                     movingFlag = -1;
                     rotatingFlag = -1;
                     scalingFlag = -1;
                 }
             }
         }
+        
+        
 
         //ジェスチャーの処理
         GestureList gestures = frame.gestures();
@@ -322,6 +422,7 @@ void SampleListener::onFrame(const Controller& controller) {
             Gesture gesture = gestures[i];
 
             //ジェスチャーの種類の出力
+            /*
             printf("  gesture[%d] ", i);
             switch (gesture.type()) {
             case Gesture::TYPE_CIRCLE:
@@ -341,6 +442,7 @@ void SampleListener::onFrame(const Controller& controller) {
                 printf("unknown\n");
                 break;
             }
+            */
         }
 
     }

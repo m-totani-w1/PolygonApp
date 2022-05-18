@@ -43,36 +43,101 @@ void display(void)
     
     
    
-    /* ポリゴンの描画 CUbe */
+    /* ポリゴンの描画  */
 
-    glBegin(GL_QUADS);
-   
-    for (int i = 1; i < latitudeNUM-1; i++) {
-        
-        for (int j = 0; j < longitudeNUM ; j++) {
-            glColor3f(0, (i+j+1)%2, (i + j) % 2);
-            glVertex3f(point[i][j].x, point[i][j].y, point[i][j].z);
-            glVertex3f(point[i+1][j].x, point[i+1][j].y, point[i+1][j].z);
-            glVertex3f(point[i+1][(j+1)%longitudeNUM].x, point[i+1][(j + 1) % longitudeNUM].y, point[i+1][(j + 1) % longitudeNUM].z);
-            glVertex3f(point[i][(j + 1) % longitudeNUM].x, point[i][(j + 1) % longitudeNUM].y, point[i][(j + 1) % longitudeNUM].z);
+    switch (shape)
+    {
+    case ball:
+        glBegin(GL_QUADS);
+
+        for (int i = 1; i < pointRowNum; i++) {
+
+            for (int j = 0; j < pointColNum; j++) {
+                glColor3f(0, (i + j + 1) % 2, (i + j) % 2);
+                glVertex3f(point[i][j].x, point[i][j].y, point[i][j].z);
+                glVertex3f(point[i + 1][j].x, point[i + 1][j].y, point[i + 1][j].z);
+                glVertex3f(point[i + 1][(j + 1) % longitudeNUM].x, point[i + 1][(j + 1) % longitudeNUM].y, point[i + 1][(j + 1) % longitudeNUM].z);
+                glVertex3f(point[i][(j + 1) % longitudeNUM].x, point[i][(j + 1) % longitudeNUM].y, point[i][(j + 1) % longitudeNUM].z);
+            }
         }
-    }
-    for (int j = 0; j < longitudeNUM; j++) {
+        for (int j = 0; j < longitudeNUM; j++) {
 
-        glColor3f(0, (j+1 ) % 2, (j) % 2);
-        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
-        glVertex3f(point[1][j].x, point[1][j].y, point[1][j].z);
-        glVertex3f(point[1][(j+1)% longitudeNUM].x, point[1][(j + 1) % longitudeNUM].y, point[1][(j + 1) % longitudeNUM].z);
-        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+            glColor3f(0, (j + 1) % 2, (j) % 2);
+            glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+            glVertex3f(point[1][j].x, point[1][j].y, point[1][j].z);
+            glVertex3f(point[1][(j + 1) % longitudeNUM].x, point[1][(j + 1) % longitudeNUM].y, point[1][(j + 1) % longitudeNUM].z);
+            glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
 
-        glColor3f(0, (latitudeNUM + j ) % 2, (latitudeNUM + j+1) % 2);
-        glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
-        glVertex3f(point[latitudeNUM-1][j].x, point[latitudeNUM-1][j].y, point[latitudeNUM-1][j].z);
-        glVertex3f(point[latitudeNUM-1][(j + 1) % longitudeNUM].x, point[latitudeNUM-1][(j + 1) % longitudeNUM].y, point[latitudeNUM-1][(j + 1) % longitudeNUM].z);
-        glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
+            glColor3f(0, (latitudeNUM + j) % 2, (latitudeNUM + j + 1) % 2);
+            glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
+            glVertex3f(point[latitudeNUM - 1][j].x, point[latitudeNUM - 1][j].y, point[latitudeNUM - 1][j].z);
+            glVertex3f(point[latitudeNUM - 1][(j + 1) % longitudeNUM].x, point[latitudeNUM - 1][(j + 1) % longitudeNUM].y, point[latitudeNUM - 1][(j + 1) % longitudeNUM].z);
+            glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
+        }
+
+        glEnd();
+        break;
+    case cube:
+        glBegin(GL_QUADS);
+        /*　上面　*/
+        glColor3f(0, 0, 1);
+        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
+        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
+        glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
+        /*　下面　*/
+        glColor3f(1, 0, 1);
+        glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
+        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
+        glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        /*　正面　*/
+        glColor3f(0, 1, 1);
+        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+        glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
+        glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
+        /*　背面　*/
+        glColor3f(1, 1, 0);
+        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
+        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
+        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
+        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        /*　右側面　*/
+        glColor3f(0, 1, 0);
+        glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
+        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
+        /*　左側面　*/
+        glColor3f(1, 0, 0);
+        glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
+        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
+        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
+        glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        
+        glEnd();
+        break;
+    case hexagon:
+        glBegin(GL_POINTS);
+        glColor3f(0.6, 1.0, 0.8);        
+        for (int i = 0; i < 6; i++) {
+            glVertex3f(point[0][i].x, point[0][i].y, point[0][i].z);
+        }
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        glColor3f(0.4, 0.8, 0.6);
+        for (int i = 0; i < 6; i++) {
+            glVertex3f(point[0][i].x, point[0][i].y, point[0][i].z);
+        }
+        glEnd();
+        break;
+    default:
+        break;
     }
-   
-    glEnd();
+
+    
 
 
 
@@ -250,7 +315,7 @@ void myInit(char* windowTitle)
     /* CG描画設定 */
     glMatrixMode(GL_PROJECTION);    /* 透視投影(遠近投影法)設定モードに切り替え */
     glLoadIdentity();               /* 透視投影行列を初期化 */
-    gluPerspective(45.0, aspect, 1.0, 20.0);    /* 透視投影行列の設定 */
+    gluPerspective(45.0, aspect, 1.0, 40.0);    /* 透視投影行列の設定 */
       /* 視野角45度, 縦横比 aspect，描画前面までの奥行 1.0，描画背面までの奥行 20.0 */
     glEnable(GL_DEPTH_TEST);        /* 隠面消去を有効にする */
 }

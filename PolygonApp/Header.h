@@ -47,9 +47,15 @@ extern int scalingFlag;       /* 拡大・縮小のフラグ */
 /* 球 */
 extern const int latitudeNUM;         /* 緯度方向の分割数 */
 extern const int longitudeNUM;        /* 経度方向の分割数 */
-extern const int R;                    /* 球の半径 */
+extern const double radiusBall;                    /* 球の半径 */
 
 /* 立方体 */
+extern const double length;
 
 /* 六角形 */
+extern const double radiusHexagon;                    /* 六角形の半径 */
 
+/*************************
+* 便利な関数
+**************************/
+float sign(float i);			/* 符号を返す */

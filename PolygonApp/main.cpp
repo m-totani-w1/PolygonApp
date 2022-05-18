@@ -50,13 +50,13 @@ int scalingFlag = -1;       /* 拡大・縮小のフラグ */
 /* 球 */
 const int latitudeNUM = 12;         /* 緯度方向の分割数 */
 const int longitudeNUM = 18;        /* 経度方向の分割数 */
-const int R = 6;                    /* 球の半径 */
+const double radiusBall = 6;                    /* 球の半径 */
 
 /* 立方体 */
+const double length = 4;
 
 /* 六角形 */
-
-
+const double radiusHexagon = 5;
 
 
 
@@ -90,4 +90,14 @@ int main(int argc, char** argv)
 
     /* プログラム終了 */
     return(0);
+}
+
+float sign(float i) {			/* 符号を返す */
+    if (i < 0) {
+        return (float) - 1;
+    }
+    else {
+        return (float) 1;
+    }
+
 }
