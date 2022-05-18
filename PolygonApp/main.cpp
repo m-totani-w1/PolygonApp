@@ -10,6 +10,7 @@
 #include "Leap.h"
 #include "SampleListener.h"
 #include "freeglut.h"
+#include "initializePolygon.h"
 
 using namespace std;
 using namespace Leap;
@@ -27,20 +28,36 @@ float CameraY = 0.0;            /* カメラの位置（Y座標） */
 float CameraZ = 18.0;            /* カメラの位置（Z座標） */
 float BoxRotate = 0.0;          /* 箱の回転角 */
 
-const int latitudeNUM = 12;
-const int longitudeNUM = 18;
-const int R = 6;
-Vector point[13][19] = {};
-Vector prePoint[13][19] = {};
-Vector pole[2] = {};
-Vector pointer = { 100,100,100 };
-Vector rotateStart = { 0,0,0 };
-Vector rotateEnd = { 0,-999,0 };
+Vector point[20][20] = {};      /* 頂点の座標 */
+Vector prePoint[20][20] = {};   /* 以前の頂点の座標 */
+int pointRowNum = 0;          /* 頂点の数（行） */
+int pointColNum = 0;            /* 頂点の数（列） */
+
+Vector pointer = { 100,100,100 };   /* 変形させる際のポインターの位置 */
+Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
+Vector rotateNow = { 0,-999,0 };    /* 回転させる際の指の現在位置　 */
+
+int movingFlag = -1;        /* 変形のフラグ*/
+int rotatingFlag = -1;      /* 回転のフラグ */
+int scalingFlag = -1;       /* 拡大・縮小のフラグ */
+
+/***********************
+ポリゴンの初期化用変数 
+**************************/
+
+/* 球 */
+const int latitudeNUM = 12;         /* 緯度方向の分割数 */
+const int longitudeNUM = 18;        /* 経度方向の分割数 */
+const int R = 6;                    /* 球の半径 */
+
+/* 立方体 */
+
+/* 六角形 */
 
 
-int movingFlag = -1;
-int rotatingFlag = -1;
-int scalingFlag = -1;
+
+
+
 
 //必要だろうか。。。？
 Controller controller;
@@ -63,7 +80,7 @@ int main(int argc, char** argv)
 
     /* 初期化 */
     glutInit(&argc, argv);  /* OpenGL の初期化 */
-    InitPoint();
+    InitBall();
     myInit(argv[0]);        /* ウインドウ表示と描画設定の初期化 */
 
     /* イベント処理ループ */

@@ -96,19 +96,19 @@ void SampleListener::onFrame(const Controller& controller) {
 
             /*　頂点座標の位置の移動 */
             if (scalingFlag == -1) {
-                rotateStart = (rotateEnd.y == 999) ? Center : rotateStart;
-                rotateEnd = Center;
+                rotateStart = (rotateNow.y == 999) ? Center : rotateStart;
+                rotateNow = Center;
                 for (int j = 0; j < latitudeNUM + 1; j++) {
                     for (int k = 0; k < longitudeNUM + 1; k++) {
                         if (hand.isLeft()) {
                             /*********************************************
-                            * 左手で頂点の移動
+                            * 変形
                             *********************************************/
                             pointer = Center / 2;
                             double dist = point[j][k].distanceTo(Center / 2);
                             //printf("pick:%f, dist:%f\n", pick, dist);
                             if (movingFlag == -1 || movingFlag == j * 100 + k) {
-                                if (dist < 1 && pick < 5) {
+                                if (dist < 1 && pick < 4) {
                                     printf("picked!!\n");
                                     movingFlag = j * 100 + k;
                                      
@@ -151,14 +151,14 @@ void SampleListener::onFrame(const Controller& controller) {
                         }
                         else {
                             /********************************************
-                            * 右手で図形の回転
+                            * 回転
                             *********************************************/
 
-                            if (pick < 5) {
+                            if (pick < 4) {
                                 printf("%d\n\n", j);
 
                                 /* マウスボタンが押されてからの移動量を計算する */
-                                Vector Move = rotateEnd - rotateStart;
+                                Vector Move = rotateNow - rotateStart;
 
 
                                 ////* x軸周りに回転 *////
@@ -173,12 +173,7 @@ void SampleListener::onFrame(const Controller& controller) {
                                 RotateX += (ZMark < 0) ? -0.02 * XMoment.x : 0.02 * XMoment.x;
                                 point[j][k].y = XDistance * sin(RotateX);
                                 point[j][k].z = XDistance * cos(RotateX) * ZMark;
-                                if (j == 0) {
-                                    pole[0].y = XDistance * sin(RotateX);
-                                    pole[0].z = XDistance * cos(RotateX) * ZMark;
-                                    pole[1].y = XDistance * sin(RotateX);
-                                    pole[1].z = XDistance * cos(RotateX) * ZMark;
-                                }
+                                
 
 
                                 ////* y軸周りに回転 *////
@@ -193,12 +188,7 @@ void SampleListener::onFrame(const Controller& controller) {
                                 RotateY += (XMark < 0) ? -0.02 * YMoment.y : 0.02 * YMoment.y;
                                 point[j][k].z = YDistance * sin(RotateY);
                                 point[j][k].x = YDistance * cos(RotateY) * XMark;
-                                if (j == 0) {
-                                    pole[0].z = YDistance * sin(RotateY);
-                                    pole[0].x = YDistance * cos(RotateY) * XMark;
-                                    pole[1].z = YDistance * sin(RotateY);
-                                    pole[1].x = YDistance * cos(RotateY) * XMark;
-                                }
+                               
 
 
                                 ////* z軸周りに回転 *////
@@ -213,18 +203,13 @@ void SampleListener::onFrame(const Controller& controller) {
                                 /*RotateZ += (YMark < 0) ? 0.02 * ZMoment.z : -0.02 * ZMoment.z;
                                 point[j][k].x = ZDistance * sin(RotateZ);
                                 point[j][k].y = ZDistance * cos(RotateZ) * YMark;
-                                if (j == 0) {
-                                    pole[0].x = ZDistance * sin(RotateZ);
-                                    pole[0].y = ZDistance * cos(RotateZ) * YMark;
-                                    pole[1].x = ZDistance * sin(RotateZ);
-                                    pole[1].y = ZDistance * cos(RotateZ) * YMark;
-                                }*/
+                                */
 
 
 
 
                                 printf("PRE Rotate X:%.1f, Y:%.1f, Z:%.1f x,y,z= %.1f, %.1f, %.1f,  start:%f  end:%f\n",
-                                    RotateX, RotateY, RotateZ, point[j][k].x, point[j][k].y, point[j][k].z, rotateStart.y, rotateEnd.y);
+                                    RotateX, RotateY, RotateZ, point[j][k].x, point[j][k].y, point[j][k].z, rotateStart.y, rotateNow.y);
 
                             }
                         }
@@ -234,12 +219,13 @@ void SampleListener::onFrame(const Controller& controller) {
             
             /* 次回の回転用に更新 */
             if (hand.isRight()) {
-                rotateStart = rotateEnd;
+                rotateStart = rotateNow;
             }
 
         }
+
         /******************************
-        *手の平を合わせたら、大きさの調整開始
+        *拡大・縮小
         *********************************/
         if (handList.count() == 2) {
             Hand handR = (handList[0].isRight()) ? handList[0] : handList[1];
@@ -257,7 +243,7 @@ void SampleListener::onFrame(const Controller& controller) {
             double dist = Rposi.distanceTo(Lposi);
             
             /* 「手のひらを合わせた」かつ「頂点を動かしていない」かつ「回転してない」時に大きさを調整 */
-            if (dist <  5 && movingFlag == -1 && rotatingFlag == -1 || scalingFlag == 1) {
+            if (dist <  4 && movingFlag == -1 && rotatingFlag == -1 || scalingFlag == 1) {
                 movingFlag = -2;
                 rotatingFlag - 2;
                 scalingFlag = 1;

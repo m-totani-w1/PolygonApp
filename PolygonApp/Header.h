@@ -25,16 +25,29 @@ extern float CameraY;            /* カメラの位置（Y座標） */
 extern float CameraZ;            /* カメラの位置（Z座標） */
 extern float BoxRotate;          /* 箱の回転角 */
 
-extern const int latitudeNUM;
-extern const int longitudeNUM;
-extern Vector point[13][19];
-extern Vector prePoint[13][19];
-extern const int R;
-extern Vector pole[2];
-extern Vector pointer;
-extern Vector rotateStart;
-extern Vector rotateEnd;
+extern Vector point[20][20];      /* 頂点の座標 */
+extern Vector prePoint[20][20];   /* 以前の頂点の座標 */
+extern int pointRowNum;          /* 頂点の数（行） */
+extern int pointColNum;            /* 頂点の数（列） */
 
-extern int movingFlag;
-extern int rotatingFlag;
-extern int scalingFlag;
+extern Vector pointer;   /* 変形させる際のポインターの位置 */
+extern Vector rotateStart;     /* 回転させる際の指のスタート位置 */
+extern Vector rotateNow;    /* 回転させる際の指の現在位置　 */
+
+extern int movingFlag;        /* 変形のフラグ*/
+extern int rotatingFlag;      /* 回転のフラグ */
+extern int scalingFlag;       /* 拡大・縮小のフラグ */
+
+/***********************
+ポリゴンの初期化用変数
+**************************/
+
+/* 球 */
+extern const int latitudeNUM;         /* 緯度方向の分割数 */
+extern const int longitudeNUM;        /* 経度方向の分割数 */
+extern const int R;                    /* 球の半径 */
+
+/* 立方体 */
+
+/* 六角形 */
+

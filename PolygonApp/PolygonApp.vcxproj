@@ -154,9 +154,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SampleListener.cpp" />
     <ClCompile Include="freeglut.cpp" />
+    <ClCompile Include="initializePolygon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header.h" />
+    <ClInclude Include="initializePolygon.h" />
     <ClInclude Include="SampleListener.h" />
     <ClInclude Include="freeglut.h" />
   </ItemGroup>

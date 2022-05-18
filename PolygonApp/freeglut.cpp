@@ -6,6 +6,7 @@
 #include "Header.h"
 #include "Leap.h"
 #include "SampleListener.h"
+#include "initializePolygon.h"
 
 
 
@@ -57,11 +58,13 @@ void display(void)
         }
     }
     for (int j = 0; j < longitudeNUM; j++) {
+
         glColor3f(0, (j+1 ) % 2, (j) % 2);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[1][j].x, point[1][j].y, point[1][j].z);
         glVertex3f(point[1][(j+1)% longitudeNUM].x, point[1][(j + 1) % longitudeNUM].y, point[1][(j + 1) % longitudeNUM].z);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
+
         glColor3f(0, (latitudeNUM + j ) % 2, (latitudeNUM + j+1) % 2);
         glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
         glVertex3f(point[latitudeNUM-1][j].x, point[latitudeNUM-1][j].y, point[latitudeNUM-1][j].z);
@@ -211,47 +214,7 @@ void mouseDrag(int x, int y)
 }
 
 
-/*********************************************************
-|
-|球の頂点を計算
-|
-**********************************************************/
 
-void InitPoint() {
-    double theta = -PI / 2;
-    double omega = 0;
-    double Dtheta = -PI / latitudeNUM;
-    double Domega = -2 * PI / longitudeNUM;
-
-    /* 二つの極の座標 */
-    theta = -PI / 2;
-    omega = 0;
-    point[0][0].x = R * cos(theta) * cos(omega);
-    point[0][0].y = R * sin(theta);
-    point[0][0].z = R * cos(theta) * sin(omega);
-    printf("pole[0](x:%2.4f,y:%2.4f,z:%2.4f)\n", pole[0].x, pole[0].y, pole[0].z);
-    theta = PI / 2;
-    omega = 0;
-    point[latitudeNUM][0].x = R * cos(theta) * cos(omega);
-    point[latitudeNUM][0].y = R * sin(theta);
-    point[latitudeNUM][0].z = R * cos(theta) * sin(omega);
-    printf("pole[1](x:%2.4f,y:%2.4f,z:%2.4f)\n", pole[1].x, pole[1].y, pole[1].z);
-
-    theta = -PI / 2;
-    for (int i = 1; i < latitudeNUM;i++) {
-        theta += Dtheta;
-        omega = 0;
-        for (int j = 0; j < longitudeNUM; j++) {
-            printf("omega:%f  theta:%f\n", omega/PI, theta/PI);
-            point[i][j].x = R * cos(theta) * cos(omega);
-            point[i][j].y = R * sin(theta);
-            point[i][j].z = R * cos(theta) * sin(omega);
-            printf("point[%d][%d](x:%2.4f,y:%2.4f,z:%2.4f)\n",i,j, point[i][j].x, point[i][j].y, point[i][j].z);
-            omega += Domega;
-        }
-        
-    }
-}
 /***********************************************************
 |  関数：myInit()
 |  説明：ウインドウ表示と描画設定の初期化
