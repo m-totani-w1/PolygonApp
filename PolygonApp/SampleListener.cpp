@@ -54,8 +54,11 @@ void SampleListener::onFrame(const Controller& controller) {
 
 
 
-        //手と指の処理
-        for (i = 0; i < handList.count(); i++) {
+        /*************************************************
+        *片手で行う操作（変形・回転）
+        ************************************************/
+        for (i = 0; i < handList.count(); i++) {    // 片手づつ処理を行う
+
             Hand hand = handList[i];
             Vector handCenter = hand.palmPosition();
             FingerList fingerList = hand.fingers();// handの指の情報を取得する
@@ -68,7 +71,7 @@ void SampleListener::onFrame(const Controller& controller) {
 
             //個別の手の情報を出力する
             //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
-               // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
+            // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
             for (j = 0; j < fingerList.count(); j++) {
                 Finger finger = fingerList[j];
                 Vector currentPosition = finger.tipPosition();
@@ -96,136 +99,184 @@ void SampleListener::onFrame(const Controller& controller) {
 
             /*　頂点座標の位置の移動 */
             if (scalingFlag == -1) {
-                rotateStart = (rotateNow.y == 999) ? Center : rotateStart;
-                rotateNow = Center;
-                for (int j = 0; j < latitudeNUM + 1; j++) {
-                    for (int k = 0; k < longitudeNUM + 1; k++) {
-                        if (hand.isLeft()) {
-                            /*********************************************
-                            * 変形
-                            *********************************************/
-                            pointer = Center / 2;
-                            double dist = point[j][k].distanceTo(Center / 2);
-                            //printf("pick:%f, dist:%f\n", pick, dist);
-                            if (movingFlag == -1 || movingFlag == j * 100 + k) {
-                                if (dist < 1 && pick < 4) {
-                                    printf("picked!!\n");
-                                    movingFlag = j * 100 + k;
-                                     
-                                    /* 摘まんだ点の動き */
-                                    point[j][k] = Center / 2;
+                
+            }
 
-                                    /* 周辺の点の動き */
-                                    double TFrate = point[j][k].distanceTo(prePoint[j][k]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
-                                    
-                                    if (j == 0 || j == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
+            /**********************************
+            * 変形
+            ************************************/
+            if (hand.isLeft()) {
+                pointer = Center / 2;
+                for (int j = 0; j < pointRowNum + 1; j++) {
+                    for (int k = 0; k < pointColNum + 1; k++) {
+                        double dist = point[j][k].distanceTo(pointer);
+                        if (movingFlag == -1 || movingFlag == j * 100 + k) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
+                            if (dist < 1 && pick < 4) {
+                                printf("picked!!\n");
+                                movingFlag = j * 100 + k;
+
+
+                                /* 摘まんだ点を動かす */
+                                point[j][k] = pointer;
+
+
+
+                                /* ポリゴンの形ごとに特殊な処理が必要な場合 */
+                                switch (shape) {
+
+                                case ball:
+                                    /* 摘まんだ点の周辺も動かす */
+                                    double TFrate;
+                                    TFrate = point[j][k].distanceTo(prePoint[j][k]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
+                                    if (j == 0 || j == pointRowNum) {   /* 摘まんだ点がpoleだった時 */
                                         int lati1 = (j == 0) ? (1) : (latitudeNUM - 1);
                                         int lati2 = (j == 0) ? (2) : (latitudeNUM - 2);
+                                        int lati3 = (j == 0) ? (3) : (latitudeNUM - 3);
                                         for (int l = 0; l < longitudeNUM; l++) {
-                                            point[lati1][l] = prePoint[lati1][l] + (point[j][k] - prePoint[lati1][l]) * 0.5 * (abs(TFrate) / 6);
-                                            point[lati2][l] = prePoint[lati2][l] + (point[j][k] - prePoint[lati2][l]) * 0.2 * (abs(TFrate) / 6);
+                                            point[lati1][l] = prePoint[lati1][l] + (point[j][k] - prePoint[lati1][l]) * 0.6 * (abs(TFrate) / 6);
+                                            point[lati2][l] = prePoint[lati2][l] + (point[j][k] - prePoint[lati2][l]) * 0.25 * (abs(TFrate) / 6);
+                                            point[lati3][l] = prePoint[lati3][l] + (point[j][k] - prePoint[lati3][l]) * 0.06 * (abs(TFrate) / 6);
                                         }
                                     }
                                     else {
                                         /* 頂点の回りの点の動き */
-                                        for (int l = -2; l <= 2; l++) {
+                                        for (int l = -3; l <= 3; l++) {
                                             if (0 < j + l && j + l < latitudeNUM) {
-                                                for (int m = -2; m <= 2; m++) {
+                                                for (int m = -3; m <= 3; m++) {
                                                     if (0 < k + m && k + m < longitudeNUM) {
                                                         if (l != 0 || m != 0) {
-                                                            point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * ((abs(l) == 2 || abs(m)==2)?0.2:0.5) * (abs(TFrate) / 6);
+                                                            if (abs(l) == 3 || abs(m) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
+                                                                point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * 0.06 * (abs(TFrate) / 6);
+                                                            }
+                                                            else if (abs(l) == 2 || abs(m) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
+                                                                point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * 0.26 * (abs(TFrate) / 6);
+                                                            }
+                                                            else {  //頂点の周辺の動き（＊頂点の隣）
+                                                                point[j + l][k + m] = prePoint[j + l][k + m] + (point[j][k] - prePoint[j + l][k + m]) * 0.6 * (abs(TFrate) / 6);
+                                                            }
                                                         }
-                                                        
                                                     }
                                                 }
                                             }
-                                            
+
                                         }
                                     }
                                     break;
+
+                                case cube:
+
+                                    break;
+
+                                case hexagon:
+                                    break;
+
                                 }
-                                else {
-                                    movingFlag = -1;
-                                }
-                            }
-                        }
-                        else {
-                            /********************************************
-                            * 回転
-                            *********************************************/
 
-                            if (pick < 4) {
-                                printf("%d\n\n", j);
-
-                                /* マウスボタンが押されてからの移動量を計算する */
-                                Vector Move = rotateNow - rotateStart;
-
-
-                                ////* x軸周りに回転 *////
-                                double RotateX = atan(point[j][k].y / abs(point[j][k].z));    /* 頂点の位置（x軸周りの回転角） */
-                                int ZMark = (point[j][k].z < 0) ? -1 : 1;     /* zの正負 */
-                                double XDistance = (double)pow(point[j][k].y * point[j][k].y + point[j][k].z * point[j][k].z, 0.5);     /* x軸までの距離 */
-                                /* Moveのx軸方向のモーメントから回転方向と回転量を計算する */
-                                Vector XAxisPerpendicular = { 0,rotateStart.y,rotateStart.z };
-                                Vector XMove = { 0,Move.y,Move.z };
-                                Vector XMoment = -XAxisPerpendicular.cross(XMove);
-                                /* 回転させる */
-                                RotateX += (ZMark < 0) ? -0.02 * XMoment.x : 0.02 * XMoment.x;
-                                point[j][k].y = XDistance * sin(RotateX);
-                                point[j][k].z = XDistance * cos(RotateX) * ZMark;
                                 
-
-
-                                ////* y軸周りに回転 *////
-                                double RotateY = atan(point[j][k].z / abs(point[j][k].x));    /* 頂点の位置（y軸周りの回転角） */
-                                int XMark = (point[j][k].x < 0) ? -1 : 1;     /* zの正負 */
-                                double YDistance = (double)pow(point[j][k].z * point[j][k].z + point[j][k].x * point[j][k].x, 0.5);     /* y軸までの距離 */
-                                /* Moveのy軸方向のモーメントから回転方向と回転量を計算する */
-                                Vector YAxisPerpendicular = { rotateStart.x,0,rotateStart.z };
-                                Vector YMove = { Move.x,0,Move.z };
-                                Vector YMoment = -YAxisPerpendicular.cross(YMove);
-                                /* 回転させる */
-                                RotateY += (XMark < 0) ? -0.02 * YMoment.y : 0.02 * YMoment.y;
-                                point[j][k].z = YDistance * sin(RotateY);
-                                point[j][k].x = YDistance * cos(RotateY) * XMark;
-                               
-
-
-                                ////* z軸周りに回転 *////
-                                double RotateZ = atan(point[j][k].x / abs(point[j][k].y));    /* 頂点の位置（z軸周りの回転角） */
-                                int YMark = (point[j][k].y < 0) ? -1 : 1;     /* yの正負 */
-                                double ZDistance = (double)pow(point[j][k].x * point[j][k].x + point[j][k].y * point[j][k].y, 0.5);     /* z軸までの距離 */
-                                /* Moveのz軸方向のモーメントから回転方向と回転量を計算する */
-                                Vector ZAxisPerpendicular = { rotateStart.x,rotateStart.y,0 };
-                                Vector ZMove = { Move.x,Move.y,0 };
-                                Vector ZMoment = ZAxisPerpendicular.cross(ZMove);
-                                /* 回転させる */
-                                /*RotateZ += (YMark < 0) ? 0.02 * ZMoment.z : -0.02 * ZMoment.z;
-                                point[j][k].x = ZDistance * sin(RotateZ);
-                                point[j][k].y = ZDistance * cos(RotateZ) * YMark;
-                                */
-
-
-
-
-                                printf("PRE Rotate X:%.1f, Y:%.1f, Z:%.1f x,y,z= %.1f, %.1f, %.1f,  start:%f  end:%f\n",
-                                    RotateX, RotateY, RotateZ, point[j][k].x, point[j][k].y, point[j][k].z, rotateStart.y, rotateNow.y);
-
+                                break;
+                            }
+                            else {
+                                movingFlag = -1;
                             }
                         }
                     }
                 }
+                
+            }
+            /**********************************
+            * 回転
+            ************************************/
+
+            if(hand.isRight()) {
+                rotateStart = (rotateNow.y == 999) ? Center : rotateStart;
+                rotateNow = Center;
+                for (int j = 0; j < pointRowNum + 1; j++) {
+                    for (int k = 0; k < pointColNum + 1; k++) {
+                        if (pick < 4) {
+                            printf("%d\n\n", j);
+
+                            /* 移動量を計算する */
+                            Vector Move = rotateNow - rotateStart;
+
+
+                            ////* x軸周りに回転 *////
+                            double RotateX = atan(point[j][k].y / abs(point[j][k].z));    /* 頂点の位置（x軸周りの角度） */
+                            int ZMark = (point[j][k].z < 0) ? -1 : 1;     /* zの正負 */
+                            double XDistance = (double)pow(point[j][k].y * point[j][k].y + point[j][k].z * point[j][k].z, 0.5);     /* x軸までの距離 */
+
+                            /* Moveのx軸方向のモーメントから回転方向と回転量を計算する */
+                            Vector XAxisPerpendicular = { 0,rotateStart.y,rotateStart.z };
+                            Vector XMove = { 0,Move.y,Move.z };
+                            Vector XMoment = -XAxisPerpendicular.cross(XMove);
+                            RotateX += (ZMark < 0) ? -0.02 * XMoment.x : 0.02 * XMoment.x;
+
+                            /* 回転させる */
+                            point[j][k].y = XDistance * sin(RotateX);
+                            point[j][k].z = XDistance * cos(RotateX) * ZMark;
+
+
+
+                            ////* y軸周りに回転 *////
+                            double RotateY = atan(point[j][k].z / abs(point[j][k].x));    /* 頂点の位置（y軸周りの角度） */
+                            int XMark = (point[j][k].x < 0) ? -1 : 1;     /* ⅹの正負 */
+                            double YDistance = (double)pow(point[j][k].z * point[j][k].z + point[j][k].x * point[j][k].x, 0.5);     /* y軸までの距離 */
+
+                            /* Moveのy軸方向のモーメントから回転方向と回転量を計算する */
+                            Vector YAxisPerpendicular = { rotateStart.x,0,rotateStart.z };
+                            Vector YMove = { Move.x,0,Move.z };
+                            Vector YMoment = -YAxisPerpendicular.cross(YMove);
+                            RotateY += (XMark < 0) ? -0.02 * YMoment.y : 0.02 * YMoment.y;
+
+                            /* 回転させる */
+                            point[j][k].z = YDistance * sin(RotateY);
+                            point[j][k].x = YDistance * cos(RotateY) * XMark;
+
+
+
+                            ////* z軸周りに回転 *////
+                            double RotateZ = atan(point[j][k].x / abs(point[j][k].y));    /* 頂点の位置（z軸周りの角度） */
+                            int YMark = (point[j][k].y < 0) ? -1 : 1;     /* yの正負 */
+                            double ZDistance = (double)pow(point[j][k].x * point[j][k].x + point[j][k].y * point[j][k].y, 0.5);     /* z軸までの距離 */
+
+                            /* Moveのz軸方向のモーメントから回転方向と回転量を計算する */
+                            Vector ZAxisPerpendicular = { rotateStart.x,rotateStart.y,0 };
+                            Vector ZMove = { Move.x,Move.y,0 };
+                            Vector ZMoment = ZAxisPerpendicular.cross(ZMove);
+                            RotateZ += (YMark < 0) ? 0.02 * ZMoment.z : -0.02 * ZMoment.z;
+
+                            /* 回転させる */
+                            /*
+                            point[j][k].x = ZDistance * sin(RotateZ);
+                            point[j][k].y = ZDistance * cos(RotateZ) * YMark;
+                            */
+
+
+
+
+                            printf("PRE Rotate X:%.1f, Y:%.1f, Z:%.1f x,y,z= %.1f, %.1f, %.1f,  start:%f  end:%f\n",
+                                RotateX, RotateY, RotateZ, point[j][k].x, point[j][k].y, point[j][k].z, rotateStart.y, rotateNow.y);
+
+                        }
+                    }
+                }
+                /* 次回の回転用に更新 */
+                if (hand.isRight()) {
+                    rotateStart = rotateNow;
+                }
+
+                
             }
             
-            /* 次回の回転用に更新 */
-            if (hand.isRight()) {
-                rotateStart = rotateNow;
-            }
+            
 
         }
 
+        /*************************************************
+        *両手で行う操作（拡大縮小）
+        ************************************************/
+
         /******************************
-        *拡大・縮小
+        *拡大縮小
         *********************************/
         if (handList.count() == 2) {
             Hand handR = (handList[0].isRight()) ? handList[0] : handList[1];

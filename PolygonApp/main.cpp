@@ -32,6 +32,8 @@ Vector point[20][20] = {};      /* 頂点の座標 */
 Vector prePoint[20][20] = {};   /* 以前の頂点の座標 */
 int pointRowNum = 0;          /* 頂点の数（行） */
 int pointColNum = 0;            /* 頂点の数（列） */
+   
+polygon shape;      /* polygonの形 */
 
 Vector pointer = { 100,100,100 };   /* 変形させる際のポインターの位置 */
 Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
