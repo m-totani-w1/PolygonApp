@@ -23,3 +23,9 @@ extern Controller controller;
 extern SampleListener listener;
 extern Screen screen;
 void CleanupExit();
+
+void henkei(Hand hand);
+void kaiten(Hand hand);
+void kakudai(HandList handList);
+void shokika(HandList handList);
+void kirikae(HandList handList);
