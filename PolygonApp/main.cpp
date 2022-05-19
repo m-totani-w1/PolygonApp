@@ -22,20 +22,22 @@ int   yBegin = 0;               /* マウスドラッグの始点Y座標 */
 int   PressButton = 0;          /* 現在押されているマウスボタン（1:左,2:中,3:右） */
 float CameraAzimuth = 90.0;   /* カメラの位置（方位角） */
 float CameraElevation = 0.0;    /* カメラの位置（仰角） */
-float CameraDistance = 16.0;    /* カメラの位置（原点からの距離） */
+float CameraDistance = 25.0;    /* カメラの位置（原点からの距離） */
 float CameraX = 0.0;            /* カメラの位置（X座標） */
-float CameraY = 0.0;            /* カメラの位置（Y座標） */
-float CameraZ = 18.0;            /* カメラの位置（Z座標） */
+float CameraY = 5.0;            /* カメラの位置（Y座標） */
+float CameraZ = 25.0;            /* カメラの位置（Z座標） */
 float BoxRotate = 0.0;          /* 箱の回転角 */
 
 Vector point[20][20] = {};      /* 頂点の座標 */
 Vector prePoint[20][20] = {};   /* 以前の頂点の座標 */
 int pointRowNum = 0;          /* 頂点の数（行） */
 int pointColNum = 0;            /* 頂点の数（列） */
+
    
 polygon shape;      /* polygonの形 */
 
 Vector pointer = { 100,100,100 };   /* 変形させる際のポインターの位置 */
+Vector nearestPoint = { 100,100,100 };/* ポインターに最も近い頂点 */
 Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
 Vector rotateNow = { 0,-999,0 };    /* 回転させる際の指の現在位置　 */
 
@@ -48,15 +50,15 @@ int scalingFlag = -1;       /* 拡大・縮小のフラグ */
 **************************/
 
 /* 球 */
-const int latitudeNUM = 12;         /* 緯度方向の分割数 */
-const int longitudeNUM = 18;        /* 経度方向の分割数 */
-const double radiusBall = 6;                    /* 球の半径 */
+const int latitudeNUM = 16;         /* 緯度方向の分割数 */
+const int longitudeNUM = 20;        /* 経度方向の分割数 */
+const double radiusBall = 8;                    /* 球の半径 */
 
 /* 立方体 */
-const double length = 4;
+const double length = 10;
 
 /* 六角形 */
-const double radiusHexagon = 5;
+const double radiusHexagon = 6;
 
 
 

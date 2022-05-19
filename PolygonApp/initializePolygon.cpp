@@ -17,7 +17,7 @@ void InitBall() {
 
     double theta = -PI / 2;
     double omega = 0;
-    double Dtheta = -PI / latitudeNUM;
+    double Dtheta = PI / (latitudeNUM);
     double Domega = -2 * PI / longitudeNUM;
 
     /* 二つの極の座標 */
@@ -70,9 +70,9 @@ void InitCube() {
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
             for (int k = 0; k < 2; k++) {
-                point[i][j*2+k].x = length / 2 * (j == 0) ? 1 : -1;
-                point[i][j*2+k].y = length / 2 * (i == 0) ? 1 : -1;
-                point[i][j*2+k].z = length / 2 * (k == 0) ? 1 : -1;
+                point[i][j*2+k].x = length / 2 * ((j == 0) ? 1 : -1);
+                point[i][j*2+k].y = length / 2 * ((i == 0) ? 1 : -1);
+                point[i][j*2+k].z = length / 2 * ((k == 0) ? 1 : -1);
                 printf("point[%d][%d](x:%2.4f,y:%2.4f,z:%2.4f)\n", i, j, point[i][j].x, point[i][j].y, point[i][j].z);
             }
         }
@@ -109,7 +109,7 @@ void InitHexagon() {
 void clearPoint() {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 20; j++) {
-            point[i][j] = {0,0,0};
+            point[i][j] = {0,-100,0};
         }
     }
 }

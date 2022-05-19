@@ -132,6 +132,7 @@ void henkei(Hand hand) {
     //個別の手の情報を出力する
     //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
     // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
+
     for (int j = 0; j < fingerList.count(); j++) {
         Finger finger = fingerList[j];
         Vector currentPosition = finger.tipPosition();
@@ -139,13 +140,25 @@ void henkei(Hand hand) {
 
         if (j == 0) {
             posi0 = currentPosition / 8;
-            posi0.y -= 30;
-            posi0.z += 8;
+            posi0.y -= 20;
+            
+            if (shape == hexagon) {
+                posi0.z += 0;
+            }
+            else {
+                posi0.z += 18;
+            }
         }
         else if (j == 1) {
             posi1 = currentPosition / 8;
-            posi1.y -= 30;
-            posi1.z += 8;
+            posi1.y -= 20;
+            
+            if (shape == hexagon) {
+                posi1.z += 0;
+            }
+            else {
+                posi1.z += 18;
+            }
         }
 
         //個別の指の情報を出力する
@@ -156,82 +169,109 @@ void henkei(Hand hand) {
     Center = (posi0 + posi1) / 2;
     pick = posi0.distanceTo(posi1);
     pointer = Center / 2;
-    for (int j = 0; j < pointRowNum + 1; j++) {
-        for (int k = 0; k < pointColNum + 1; k++) {
-            double dist = point[j][k].distanceTo(pointer);
-
-            if (rotatingFlag == -1 && movingFlag == -1 || movingFlag == j * 100 + k) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
-                if (dist < 1 && pick < 4) {
-                    if (movingFlag == -1) { printf("Transform Start!!\n"); }
-                    movingFlag = j * 100 + k;
 
 
-                    /* 摘まんだ点を動かす */
-                    point[j][k] = pointer;
+    double dist = 100;
+    int I =NULL, J=NULL ;   /* pointerに最も近い頂点 */
 
+    /* pointerに最も近い頂点を探す */
+    Vector tmpNearestPoint = { 0,0,0 };
+    for (int i = 0; i < pointRowNum ; i++) {
+        for (int j = 0; j < pointColNum; j++) {
+            dist = point[i][j].distanceTo(pointer);
+            if (dist < tmpNearestPoint.distanceTo(pointer)) {
+                tmpNearestPoint = point[i][j];
+                I = i;
+                J = j;
 
-
-                    /* ポリゴンの形ごとに特殊な処理が必要な場合 */
-                    switch (shape) {
-
-                    case ball:
-                        /* 摘まんだ点の周辺も動かす */
-                        double TFrate;
-                        TFrate = point[j][k].distanceTo(prePoint[j][k]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
-                        if (j == 0 || j == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
-                            int lati1 = (j == 0) ? (1) : (latitudeNUM - 1);
-                            int lati2 = (j == 0) ? (2) : (latitudeNUM - 2);
-                            int lati3 = (j == 0) ? (3) : (latitudeNUM - 3);
-                            for (int l = 0; l < longitudeNUM; l++) {
-                                point[lati1][l] = prePoint[lati1][l] + (point[j][k] - prePoint[lati1][l]) * 0.6 * (abs(TFrate) / 6);
-                                point[lati2][l] = prePoint[lati2][l] + (point[j][k] - prePoint[lati2][l]) * 0.25 * (abs(TFrate) / 6);
-                                point[lati3][l] = prePoint[lati3][l] + (point[j][k] - prePoint[lati3][l]) * 0.06 * (abs(TFrate) / 6);
-                            }
-                        }
-                        else {
-                            /* 頂点の回りの点の動き */
-                            for (int l = -3; l <= 3; l++) {
-                                if (0 < j + l && j + l < latitudeNUM) {
-                                    for (int m = -3; m <= 3; m++) {
-                                        if (l != 0 || m != 0) {
-                                            if (abs(l) == 3 || abs(m) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
-                                                point[j + l][(k + m + longitudeNUM) % longitudeNUM] = prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM] + (point[j][k] - prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM]) * 0.06 * (abs(TFrate) / 6);
-                                            }
-                                            else if (abs(l) == 2 || abs(m) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
-                                                point[j + l][(k + m + longitudeNUM) % longitudeNUM] = prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM] + (point[j][k] - prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM]) * 0.26 * (abs(TFrate) / 6);
-                                            }
-                                            else {  //頂点の周辺の動き（＊頂点の隣）
-                                                point[j + l][(k + m + longitudeNUM) % longitudeNUM] = prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM] + (point[j][k] - prePoint[j + l][(k + m + longitudeNUM) % longitudeNUM]) * 0.6 * (abs(TFrate) / 6);
-                                            }
-
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                        break;
-
-                    case cube:
-
-                        break;
-
-                    case hexagon:
-                        break;
-                    default:
-                        break;
-
-                    }
-
-
-                    break;
-                }
-                else {
-                    if (movingFlag == 0) { printf("Transform Finished!!!\n"); }
-                    movingFlag = -1;
-                }
             }
         }
+    }
+    dist = pointer.distanceTo(tmpNearestPoint);
+   nearestPoint = tmpNearestPoint;
+    
+    
+
+    if (rotatingFlag == -1 && movingFlag == -1 || movingFlag == I*100+J) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
+        if ( pick < 4) {
+            if (movingFlag == -1) { printf("Transform Start!!\n"); }
+            movingFlag = I * 100 + J;
+
+
+            /* 摘まんだ点を動かす */
+            printf("%d %d\n", I, J);
+            point[I][J] = pointer;
+
+
+
+            /* ポリゴンの形ごとに特殊な処理が必要な場合 */
+            switch (shape) {
+
+            case ball:
+                /* 摘まんだ点の周辺も動かす */
+                double TFrate;
+                TFrate = point[I][J].distanceTo(prePoint[I][J]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
+                TFrate = abs(TFrate) / (CameraDistance * 0.7);
+                if (I == 0 || I == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
+                    int lati1 = (I == 0) ? (1) : (latitudeNUM - 1);
+                    int lati2 = (I == 0) ? (2) : (latitudeNUM - 2);
+                    int lati3 = (I == 0) ? (3) : (latitudeNUM - 3);
+                    for (int l = 0; l < longitudeNUM; l++) {
+                        point[lati1][l] = prePoint[lati1][l] + (point[I][J] - prePoint[lati1][l]) * 0.6 * TFrate;
+                        point[lati2][l] = prePoint[lati2][l] + (point[I][J] - prePoint[lati2][l]) * 0.25 * TFrate;
+                        point[lati3][l] = prePoint[lati3][l] + (point[I][J] - prePoint[lati3][l]) * 0.06 * TFrate;
+                    }
+                }
+                else {
+                    /* 頂点の回りの点の動き */
+                    for (int i = -3; i <= 3; i++) {
+                        if (0 < I + i && I + i < latitudeNUM) {
+                            for (int j = -3; j <= 3; j++) {
+                                if (i != 0 || j != 0) {
+                                    if (abs(i) == 3 || abs(j) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
+                                        point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.06 * TFrate;
+                                    }
+                                    else if (abs(i) == 2 || abs(j) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
+                                        point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.26 * TFrate;
+                                    }
+                                    else {  //頂点の周辺の動き（＊頂点の隣）
+                                        point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.6 * TFrate;
+                                    }
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+                break;
+
+            case cube:
+
+                break;
+
+            case hexagon:
+                break;
+            default:
+                break;
+
+            }
+
+        }
+        else {
+            if (pick >= 4) {
+                if (movingFlag == 0) { printf("Transform Finished!!!\n"); }
+                movingFlag = -1;
+            }
+
+        }
+        
+    }
+    else {
+        if (pick >= 4) {
+            movingFlag = -1;
+        }
+
     }
 }
 /***********************************
