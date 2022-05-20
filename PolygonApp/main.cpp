@@ -37,13 +37,19 @@ int pointColNum = 0;            /* 頂点の数（列） */
 polygon shape;      /* polygonの形 */
 
 Vector pointer = { 100,100,100 };   /* 変形させる際のポインターの位置 */
+Vector prePointer = { 100,100,100 };        /* 1つ前のポインターの位置 */
 Vector nearestPoint = { 100,100,100 };/* ポインターに最も近い頂点 */
 Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
 Vector rotateNow = { 0,-999,0 };    /* 回転させる際の指の現在位置　 */
 
+bool easyMode = true;       /* 簡単モード */
+
 int movingFlag = -1;        /* 変形のフラグ*/
 int rotatingFlag = -1;      /* 回転のフラグ */
 int scalingFlag = -1;       /* 拡大・縮小のフラグ */
+
+
+unsigned char image[400][640][3];       /* 背景の画像 */
 
 /***********************
 ポリゴンの初期化用変数 

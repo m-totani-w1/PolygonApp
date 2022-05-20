@@ -1,5 +1,7 @@
 
 #include <math.h>
+#include<stdio.h>
+#include<stdlib.h>
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -9,6 +11,22 @@
 #include "initializePolygon.h"
 
 
+/***************************************************
+* 画像の読込
+***************************************************/
+
+
+int ppm_read(const char* filename, unsigned char* pimage) {
+    FILE* fp;
+    if ((ERROR != fopen_s(&fp,filename, "rb"))) {
+        printf("ERROR:%s\n", filename);
+        exit(-1);
+    }
+    fscanf_s(fp, "P6\n640 480\n255\n");
+    fread(pimage, sizeof(char), 640 * 400 * 3, fp);
+    fclose(fp);
+    return 0;
+}
 //----------------------------------------------------
 // 大地の描画
 //----------------------------------------------------
@@ -17,25 +35,39 @@ void Ground(void) {
     double ground_max_y = 30.0;
     double ground_max_z = 70.0;
 
-    //glColor3d(1, 1, 1);  // 大地の色(白色)
-    glColor3d(0.52, 0.29, 0.17);  // 大地の色(茶色)
-    //glColor3d(0.645, 0.845, 0.268);  // 大地の色(草色)
+
     glBegin(GL_QUADS);
-    glVertex3d(ground_max_x, -15.1, ground_max_z);
-    glVertex3d(ground_max_x, -15.1, -ground_max_z);
-    glVertex3d(-ground_max_x, -15.1, -ground_max_z);
-    glVertex3d(-ground_max_x, -15.1, ground_max_z);
+    for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5) {
+        for (double lz = -ground_max_z; lz <= ground_max_z; lz += 5) {
+            if ((int)(lx+((int)lz)%2+1) % 2) {
+                glColor3d(0.7, 0.7, 0.7);  // 大地の色(白色)
+            }
+            else {
+                glColor3d(0.4, 0.4, 0.4);  // 大地の色(白色)
+            }
+            //glColor3d(1, 1, 1);  // 大地の色(白色)
+            //glColor3d(0.52, 0.29, 0.17);  // 大地の色(茶色)
+            //glColor3d(0.645, 0.845, 0.268);  // 大地の色(草色)
+            
+            glVertex3d(lx, -15.1, lz);
+            glVertex3d(lx, -15.1, lz+5);
+            glVertex3d(lx+5, -15.1, lz+5);
+            glVertex3d(lx + 5, -15.1, lz);
+            
+        } 
+    }
     glEnd();
 
     //glColor3d(1,1, 1);  // 壁の色(白)
-    glColor3d(0.565, 0.843, 0.925);  // 壁の色(空色)
-    glBegin(GL_QUADS);
-    glVertex3d(ground_max_x, ground_max_y, -ground_max_z-0.1);
-    glVertex3d(ground_max_x, -ground_max_y, -ground_max_z - 0.1);
-    glVertex3d(-ground_max_x, -ground_max_y, -ground_max_z - 0.1);
-    glVertex3d(-ground_max_x, ground_max_y, -ground_max_z - 0.1);
-    glEnd();
+    //glColor3d(1, 1, 1);  // 壁の色(空色)
+    //glBegin(GL_QUADS);
+    //glVertex3d(ground_max_x, ground_max_y, -ground_max_z-0.1);
+    //glVertex3d(ground_max_x, -ground_max_y, -ground_max_z - 0.1);
+    //glVertex3d(-ground_max_x, -ground_max_y, -ground_max_z - 0.1);
+    //glVertex3d(-ground_max_x, ground_max_y, -ground_max_z - 0.1);
+    //glEnd();
 
+    glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
     
 
     glColor3d(0, 0, 0);  // 大地の線の色
@@ -44,6 +76,9 @@ void Ground(void) {
     for (double lz = -ground_max_z; lz <= ground_max_z; lz += 5) {
         glVertex3d(-ground_max_x,-15,lz);
         glVertex3d(ground_max_x,-15,lz);
+        
+        
+
     }
     for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5) {
         glVertex3d(lx,-15, ground_max_z);
@@ -303,6 +338,20 @@ void keyboard(unsigned char key, int x, int y)
     /* キーボード処理 */
     switch (key)
     {
+    case 'm':/* 操作モード変更 */
+        if (easyMode) {
+            easyMode = false;
+        }
+        else {
+            easyMode = true;
+        }
+        break;
+    case 'i':
+        shokika();      /* 初期化 */
+        break;
+    case 's':
+        kirikae(1);      /* 切替 */
+        break;
     case 'q':
         exit(0);      /* プログラム終了 */
         break;
@@ -334,6 +383,7 @@ void mouseButton(int button, int state, int x, int y)
         {
         case GLUT_LEFT_BUTTON:  /* マウス左ボタンを押した時の処理 */
             PressButton = button;
+            shokika();      /* 初期化 */
             break;
 
         case GLUT_MIDDLE_BUTTON:/* マウス中ボタンを押した時の処理 */
@@ -341,6 +391,7 @@ void mouseButton(int button, int state, int x, int y)
 
         case GLUT_RIGHT_BUTTON: /* マウス右ボタンを押した時の処理 */
             PressButton = button;
+            kirikae(1);      /* 切替 */
             break;
         }
 
@@ -418,6 +469,8 @@ void myInit(char* windowTitle)
     glutCreateWindow(windowTitle);                  /* ウインドウの表示 */
     glClearColor(1.0, 1.0, 1.0, 1.0);              /* 画面消去色の設定 */
 
+    
+
     //光源の設定--------------------------------------
     GLfloat light_position0[] = { CameraX, CameraY-1, CameraZ+1, 1.0 }; //光源0の座標
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0); //光源0を
@@ -438,5 +491,7 @@ void myInit(char* windowTitle)
     
 
     glEnable(GL_DEPTH_TEST);        /* 隠面消去を有効にする */
+    /* 画像の読込 */
+    ppm_read("universe.ppm", &image[0][0][0]);
 }
 

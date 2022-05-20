@@ -33,13 +33,19 @@ enum polygon { ball, cube, hexagon };
 extern polygon shape;      /* polygonの形 */
 
 extern Vector pointer;   /* 変形させる際のポインターの位置 */
+extern Vector prePointer;        /* 1つ前のポインターの位置 */
 extern Vector nearestPoint;	/* ポインターに最も近い頂点 */
 extern Vector rotateStart;     /* 回転させる際の指のスタート位置 */
 extern Vector rotateNow;    /* 回転させる際の指の現在位置　 */
 
+extern bool easyMode;	/* 簡単モード */
+
 extern int movingFlag;        /* 変形のフラグ*/
 extern int rotatingFlag;      /* 回転のフラグ */
 extern int scalingFlag;       /* 拡大・縮小のフラグ */
+
+
+extern unsigned char image[400][640][3];       /* 背景の画像 */
 
 /***********************
 ポリゴンの初期化用変数
