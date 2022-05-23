@@ -73,7 +73,7 @@ void InitCube() {
                 point[i][j*2+k].x = length / 2 * ((j == 0) ? 1 : -1);
                 point[i][j*2+k].y = length / 2 * ((i == 0) ? 1 : -1);
                 point[i][j*2+k].z = length / 2 * ((k == 0) ? 1 : -1);
-                printf("point[%d][%d](x:%2.4f,y:%2.4f,z:%2.4f)\n", i, j, point[i][j].x, point[i][j].y, point[i][j].z);
+                printf("point[%d][%d](x:%2.4f,y:%2.4f,z:%2.4f)\n", i, j * 2 + k, point[i][j * 2 + k].x, point[i][j * 2 + k].y, point[i][j * 2 + k].z);
             }
         }
 
@@ -113,3 +113,4 @@ void clearPoint() {
         }
     }
 }
+

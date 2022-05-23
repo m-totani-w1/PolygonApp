@@ -58,8 +58,13 @@ void SampleListener::onFrame(const Controller& controller) {
         scaleFlag = -1;    
         deformFlag = -1;
     }
+    if (shape == shadowCube) {
+
+        autoKaiten();
+    }
     for (int i = 0; i < handList.count(); i++) {    // 片手づつ処理を行う
         Hand hand = handList[i];
+        
     /* 変形 */
         if (hand.isLeft()) {
             if (handList.count() == 1) {
@@ -545,6 +550,8 @@ void kirikae(int i) {
         case hexagon:
             InitBall();
             break;
+        case shadowCube:
+
         default:
             break;
         }
@@ -644,6 +651,7 @@ void easyKaitenKakudai(Hand hand) {
 
                 point[i][j] = scale * prePoint[i][j];
 
+                
                 ////* y軸周りに回転 *////
                 double RotateY = (point[i][j].x == 0) ? PI / 2 * sign(point[i][j].x) : atan((point[i][j].z / abs(point[i][j].x)));    /* 頂点の位置（y軸周りの角度） */
                 int XMark = (point[i][j].x < 0) ? -1 : 1;     /* ⅹの正負 */
@@ -665,6 +673,43 @@ void easyKaitenKakudai(Hand hand) {
         printf("Rotation and Scaling Finished!!\n");
     }
 
+}
+void autoKaiten() {
+    if (deformFlag == -1) {
+        for (int i = 0; i < pointRowNum; i++) {
+            for (int j = 0; j < pointColNum; j++) {
+
+
+                ////* x軸周りに回転 *////
+                double RotateX = (point[i][j].z == 0) ? PI / 2 * sign(point[i][j].y) : atan((point[i][j].y / abs(point[i][j].z)));    /* 頂点の位置（x軸周りの角度） */
+                int ZMark = (point[i][j].z < 0) ? -1 : 1;     /* zの正負 */
+                double XDistance = (double)pow(point[i][j].y * point[i][j].y + point[i][j].z * point[i][j].z, 0.5);     /* x軸までの距離 */
+
+                RotateX -= 0.01 * ZMark;
+
+                /* 回転させる */
+                point[i][j].y = XDistance * sin(RotateX);
+                point[i][j].z = XDistance * cos(RotateX) * ZMark;
+
+
+                ////* z軸周りに回転 *////
+                double RotateZ = (point[i][j].y == 0) ? PI / 2 * sign(point[i][j].y) : atan((point[i][j].x / abs(point[i][j].y)));    /* 頂点の位置（z軸周りの角度） */
+                int YMark = (point[i][j].y < 0) ? -1 : 1;     /* yの正負 */
+                double ZDistance = (double)pow(point[i][j].x * point[i][j].x + point[i][j].y * point[i][j].y, 0.5);     /* z軸までの距離 */
+
+                RotateZ -= 0.01 * YMark;
+
+                /* 回転させる */
+
+                point[i][j].x = ZDistance * sin(RotateZ);
+                point[i][j].y = ZDistance * cos(RotateZ) * YMark;
+
+
+
+            }
+        }
+    }
+    
 }
 double getPick(Hand hand,int handNum) {
     /********************************************

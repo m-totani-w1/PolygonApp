@@ -127,13 +127,14 @@ void display(void)
         0.0, 0.0, 0.0,  /* 注視点の位置 */
         0.0, 1.0, 0.0); /* カメラ上方向のベクトル */
 
-    //陰影ON-----------------------------
-    //glEnable(GL_LIGHTING);
-    //glEnable(GL_LIGHT0);//光源0を利用
-    //-----------------------------------
-
+    
     /* 地面のひょうじ　*/
     Ground();
+
+    GLfloat color[4] = { 0,0,0,1 };
+    GLdouble normal[3] = { 0,0,0 };
+
+    Vector tmpNormal;
 
     glPointSize(10);
     glBegin(GL_POINTS);
@@ -248,39 +249,46 @@ void display(void)
         glEnd();
         break;
     case cube:
+        
+
         glBegin(GL_QUADS);
+        
         /*　上面　*/
         glColor3f(0, 0, 1);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
+        
         /*　下面　*/
-        glColor3f(1, 0, 1);
+        glColor3f(0, 1, 1);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        
         /*　正面　*/
-        glColor3f(0, 1, 1);
+        glColor3f(1, 0.5, 0.5);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
         glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
+
         /*　背面　*/
         glColor3f(1, 1, 0);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+
         /*　右側面　*/
-        glColor3f(0, 1, 0);
+        glColor3f(1, 0, 0);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
         /*　左側面　*/
-        glColor3f(1, 0, 0);
+        glColor3f(0, 1, 0);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
         glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
@@ -304,6 +312,28 @@ void display(void)
         }
         glEnd();
         break;
+    case shadowCube:
+        //陰影ON-----------------------------
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);//光源0を利用
+        //-----------------------------------
+        //色
+        //color[0] = 0;
+        //color[1] = 0;
+        //color[2] = 1;
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+        //glColor3f(0, 0, 1);
+        //垂線の向き
+        tmpNormal = point[0][0] - point[1][0];
+        normal[0] = tmpNormal.x;
+        normal[1] = tmpNormal.y;
+        normal[2] = tmpNormal.z;
+        glNormal3dv(normal);
+         
+        //陰影OFF-----------------------------
+        glDisable(GL_LIGHTING);
+        //-----------------------------------
+        break;
     default:
         break;
     }
@@ -312,9 +342,7 @@ void display(void)
 
 
 
-    //陰影OFF-----------------------------
-    //glDisable(GL_LIGHTING);
-    //-----------------------------------
+    
 
 
     /* 上記で描画されたCGをモニターに出力 */
@@ -493,7 +521,7 @@ void myInit(char* windowTitle)
     
 
     //光源の設定--------------------------------------
-    GLfloat light_position0[] = { CameraX, CameraY-1, CameraZ+1, 1.0 }; //光源0の座標
+    GLfloat light_position0[] = { 0, 20, 25, 1.0 }; //光源0の座標
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0); //光源0を
 
     /* イベント発生時に呼び出す関数の登録 */

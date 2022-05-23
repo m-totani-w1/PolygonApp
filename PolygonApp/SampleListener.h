@@ -36,5 +36,6 @@ double getPick(Hand hand,int handNum);
 /* 簡単モード */
 void easyHenkei(Hand hand);
 void easyKaitenKakudai(Hand hand);
+void autoKaiten();
 void shokika();
 void kirikae(int i);
