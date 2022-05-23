@@ -43,7 +43,7 @@ void SampleListener::onFrame(const Controller& controller) {
     /********************************************
     * 頂点を更新する前に保存 （更新中は保存しない）
     *******************************************/
-    if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) {
+    if (deformFlag == -1 && rotateFlag == -1 && scaleFlag == -1) {
         prePointer[0] = pointer[0];
         prePointer[1] = pointer[1];
         for (int i = 0; i < latitudeNUM + 1; i++) {
@@ -53,11 +53,19 @@ void SampleListener::onFrame(const Controller& controller) {
         }
     }
     
-
+    if (handList.count()) {
+        rotateFlag = -1;       
+        scaleFlag = -1;    
+        deformFlag = -1;
+    }
     for (int i = 0; i < handList.count(); i++) {    // 片手づつ処理を行う
         Hand hand = handList[i];
     /* 変形 */
         if (hand.isLeft()) {
+            if (handList.count() == 1) {
+                rotateFlag = -1;        //左手のみなら、回転フラグをー１
+                scaleFlag = -1;        //左手のみなら、拡大フラグをー１
+            }
             
             if (easyMode) {
                 easyHenkei(hand);
@@ -68,6 +76,7 @@ void SampleListener::onFrame(const Controller& controller) {
         }
         /* 回転 */
         if (hand.isRight()) {
+            if (handList.count() == 1)deformFlag = -1;        //右手のみなら、変形フラグをー１
             if (easyMode) {
                 easyKaitenKakudai(hand);
                 //easyKakudai(hand);
@@ -136,44 +145,8 @@ void CleanupExit() {
 * 変形
 ***********************************/
 void henkei(Hand hand) {
-    /********************************************
-    * 手の情報を処理
-    ********************************************/
-    Vector handCenter = hand.palmPosition();
-    FingerList fingerList = hand.fingers();// handの指の情報を取得する
+    double pick = getPick(hand,0);
 
-    Vector posi0, posi1;
-    Vector Center = { 0,0,0 };
-
-    double pick = 100;
-
-    //個別の手の情報を出力する
-    //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
-    // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
-    for (int j = 0; j < fingerList.count(); j++) {
-        Finger finger = fingerList[j];
-        Vector currentPosition = finger.tipPosition();
-
-        if (j == 0) {
-            posi0 = currentPosition / 8;
-            posi0.y -= 30;
-            posi0.z += 8;
-        }
-        else if (j == 1) {
-            posi1 = currentPosition / 8;
-            posi1.y -= 30;
-            posi1.z += 8;
-        }
-
-        //個別の指の情報を出力する
-        // printf("    finger[%d] (%6.1f,%6.1f,%6.1f)\n",
-        //   j, currentPosition.x , currentPosition.y, currentPosition.z);
-    }
-
-    Center = (posi0 + posi1) / 2;
-    pick = posi0.distanceTo(posi1);
-    pointer[0] = Center / 2;
-    
     double dist = 100;
     int I =NULL, J=NULL ;   /* pointerに最も近い頂点 */
 
@@ -194,87 +167,80 @@ void henkei(Hand hand) {
     dist = pointer[0].distanceTo(tmpNearestPoint);
    nearestPoint = tmpNearestPoint;
    
-    if (rotatingFlag == -1 && movingFlag == -1 || movingFlag == I*100+J) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
-        if ( pick < 4) {
-            if (movingFlag == -1) { printf("Transform Start!!\n"); }
-            movingFlag = I * 100 + J;
+    if (rotateFlag == -1 && scaleFlag == -1 && pick < 4 || deformFlag == I*100+J) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
+        if (deformFlag == -1) { printf("Transform Start!!\n"); }
+        deformFlag = I * 100 + J;
 
 
-            /* 摘まんだ点を動かす */
-            printf("%d %d\n", I, J);
-            point[I][J] = pointer[0];
+        /* 摘まんだ点を動かす */
+        printf("%d %d\n", I, J);
+        point[I][J] = pointer[0];
 
 
 
-            /* ポリゴンの形ごとに特殊な処理が必要な場合 */
-            switch (shape) {
+        /* ポリゴンの形ごとに特殊な処理が必要な場合 */
+        switch (shape) {
 
-            case ball:
-                /* 摘まんだ点の周辺も動かす */
-                double TFrate;
-                TFrate = point[I][J].distanceTo(prePoint[I][J]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
-                TFrate = abs(TFrate) / (CameraDistance * 0.7);
-                if (I == 0 || I == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
-                    int lati1 = (I == 0) ? (1) : (latitudeNUM - 1);
-                    int lati2 = (I == 0) ? (2) : (latitudeNUM - 2);
-                    int lati3 = (I == 0) ? (3) : (latitudeNUM - 3);
-                    for (int l = 0; l < longitudeNUM; l++) {
-                        point[lati1][l] = prePoint[lati1][l] + (point[I][J] - prePoint[lati1][l]) * 0.6 * TFrate;
-                        point[lati2][l] = prePoint[lati2][l] + (point[I][J] - prePoint[lati2][l]) * 0.25 * TFrate;
-                        point[lati3][l] = prePoint[lati3][l] + (point[I][J] - prePoint[lati3][l]) * 0.06 * TFrate;
-                    }
+        case ball:
+            /* 摘まんだ点の周辺も動かす */
+            double TFrate;
+            TFrate = point[I][J].distanceTo(prePoint[I][J]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
+            TFrate = abs(TFrate) / (CameraDistance * 0.7);
+            if (I == 0 || I == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
+                int lati1 = (I == 0) ? (1) : (latitudeNUM - 1);
+                int lati2 = (I == 0) ? (2) : (latitudeNUM - 2);
+                int lati3 = (I == 0) ? (3) : (latitudeNUM - 3);
+                for (int l = 0; l < longitudeNUM; l++) {
+                    point[lati1][l] = prePoint[lati1][l] + (point[I][J] - prePoint[lati1][l]) * 0.6 * TFrate;
+                    point[lati2][l] = prePoint[lati2][l] + (point[I][J] - prePoint[lati2][l]) * 0.25 * TFrate;
+                    point[lati3][l] = prePoint[lati3][l] + (point[I][J] - prePoint[lati3][l]) * 0.06 * TFrate;
                 }
-                else {
-                    /* 頂点の回りの点の動き */
-                    for (int i = -3; i <= 3; i++) {
-                        if (0 < I + i && I + i < latitudeNUM) {
-                            for (int j = -3; j <= 3; j++) {
-                                if (i != 0 || j != 0) {
-                                    if (abs(i) == 3 || abs(j) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
-                                        point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.06 * TFrate;
-                                    }
-                                    else if (abs(i) == 2 || abs(j) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
-                                        point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.26 * TFrate;
-                                    }
-                                    else {  //頂点の周辺の動き（＊頂点の隣）
-                                        point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.6 * TFrate;
-                                    }
-
+            }
+            else {
+                /* 頂点の回りの点の動き */
+                for (int i = -3; i <= 3; i++) {
+                    if (0 < I + i && I + i < latitudeNUM) {
+                        for (int j = -3; j <= 3; j++) {
+                            if (i != 0 || j != 0) {
+                                if (abs(i) == 3 || abs(j) == 3) {   //頂点の周辺の動き（＊頂点の隣の隣の隣）
+                                    point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.06 * TFrate;
                                 }
+                                else if (abs(i) == 2 || abs(j) == 2) {  //頂点の周辺の動き（＊頂点の隣の隣）
+                                    point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.26 * TFrate;
+                                }
+                                else {  //頂点の周辺の動き（＊頂点の隣）
+                                    point[I + i][(J + j + longitudeNUM) % longitudeNUM] = prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM] + (point[I][J] - prePoint[I + i][(J + j + longitudeNUM) % longitudeNUM]) * 0.6 * TFrate;
+                                }
+
                             }
                         }
-
                     }
+
                 }
-                break;
-
-            case cube:
-
-                break;
-
-            case hexagon:
-                break;
-            default:
-                break;
-
             }
+            break;
 
-        }
-        else {
-            if (pick >= 4) {
-                if (movingFlag == 0) { printf("Transform Finished!!!\n"); }
-                movingFlag = -1;
-            }
+        case cube:
+
+            break;
+
+        case hexagon:
+            break;
+        default:
+            break;
 
         }
         
-    }
-    else {
-        if (pick >= 4) {
-            movingFlag = -1;
-        }
 
+        
+        
     }
+
+    if (pick >= 4 && deformFlag == I * 100 + J) {
+        printf("Transform Finished!!!\n");
+        deformFlag = -1;
+    }
+    
 }
 
 /***********************************
@@ -282,48 +248,12 @@ void henkei(Hand hand) {
 ***********************************/
 void kaiten(Hand hand) {
 
-    /********************************************
-    * 手の情報を処理
-    ********************************************/
-    Vector handCenter = hand.palmPosition();
-    FingerList fingerList = hand.fingers();// handの指の情報を取得する
-
-    Vector posi0, posi1;
-    Vector Center = { 0,0,0 };
-
-    double pick = 100;
-
-    //個別の手の情報を出力する
-    //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
-    // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
-    for (int j = 0; j < fingerList.count(); j++) {
-        Finger finger = fingerList[j];
-        Vector currentPosition = finger.tipPosition();
-
-        if (j == 0) {
-            posi0 = currentPosition / 8;
-            posi0.y -= 30;
-            posi0.z += 8;
-        }
-        else if (j == 1) {
-            posi1 = currentPosition / 8;
-            posi1.y -= 30;
-            posi1.z += 8;
-        }
-
-        //個別の指の情報を出力する
-        // printf("    finger[%d] (%6.1f,%6.1f,%6.1f)\n",
-        //   j, currentPosition.x , currentPosition.y, currentPosition.z);
-    }
-
-    Center = (posi0 + posi1) / 2;
-    pick = posi0.distanceTo(posi1);
-    pointer[1] = Center / 2;
+    double pick = getPick(hand, 1);
     
 
-    if (movingFlag == -1 && pick < 4 || rotatingFlag == 1) {
-        if (rotatingFlag == -1) { printf("Rotation Start!!!\n"); }
-        rotatingFlag = 1;
+    if (deformFlag == -1 && scaleFlag == -1 && pick < 4 || rotateFlag == 1) {
+        if (rotateFlag == -1) { printf("Rotation Start!!!\n"); }
+        rotateFlag = 1;
         for (int j = 0; j < pointRowNum; j++) {
             for (int k = 0; k < pointColNum; k++) {
                 /* 移動量を計算する */
@@ -394,8 +324,8 @@ void kaiten(Hand hand) {
             }
         }
     }
-    if (pick >= 4 && rotatingFlag == 1) {
-        rotatingFlag = -1;
+    if (pick >= 4 && rotateFlag == 1) {
+        rotateFlag = -1;
         printf("Rotation Finished!!\n");
     }
     
@@ -424,11 +354,9 @@ void kakudai(HandList handList) {
 
     double scale = Rposi1.distanceTo(Lposi1);    //右人差し指と左人差し指の距離
         /* 「手のひらを合わせた」かつ「頂点を動かしていない」かつ「回転してない」時に大きさを調整 */
-    if (scale < 4 && movingFlag == -1 && rotatingFlag == -1 || scalingFlag == 1) {
-        if (scalingFlag == -1) printf("scaling start!!!\n");
-        movingFlag = -2;
-        rotatingFlag = -2;
-        scalingFlag = 1;
+    if (scale < 4 && deformFlag == -1 && rotateFlag == -1 || scaleFlag == 1) {
+        if (scaleFlag == -1) printf("scaling start!!!\n");
+        scaleFlag = 1;
 
 
 
@@ -440,14 +368,15 @@ void kakudai(HandList handList) {
         }
         printf("magnification：%f\n", 0.1 * scale);
 
-        double finishR = Rposi1.distanceTo(Rposi0);     //右人差し指と右親指の距離
-        double finishL = Lposi1.distanceTo(Lposi0);     //左人差し指と左親指の距離
-        if (finishR < 4 || finishL < 4) {      //摘まむしぐさでスケーリング終了
-            movingFlag = -1;
-            rotatingFlag = -1;
-            scalingFlag = -1;
-            printf("scaling finished!\n");
-        }
+    }
+
+    double finishR = Rposi1.distanceTo(Rposi0);     //右人差し指と右親指の距離
+    double finishL = Lposi1.distanceTo(Lposi0);     //左人差し指と左親指の距離
+    if (finishR < 4 || finishL < 4) {      //摘まむしぐさでスケーリング終了
+        deformFlag = -1;
+        rotateFlag = -1;
+        scaleFlag = -1;
+        printf("scaling finished!\n");
     }
 }
 /***********************************
@@ -478,13 +407,13 @@ void shokika(HandList handList) {
 
     double init[2] = { Rposi1.distanceTo(Lposi3),Lposi1.distanceTo(Rposi3) };//人差し指と薬指の距離
 
-    if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) { //どの操作もしていないなら
+    if (deformFlag == -1 && rotateFlag == -1 && scaleFlag == -1) { //どの操作もしていないなら
 
         if (init[0] < 4 || init[1] < 4) {   //薬指と人差し指が近づいたら
             printf("initialize!!!");
-            movingFlag = -3;
-            rotatingFlag = -3;
-            scalingFlag = -3;
+            deformFlag = -2;
+            rotateFlag = -2;
+            scaleFlag = -2;
             switch (shape)
             {
             case ball:
@@ -500,21 +429,21 @@ void shokika(HandList handList) {
                 break;
             }
             Sleep(800);
-            movingFlag = -1;
-            rotatingFlag = -1;
-            scalingFlag = -1;
+            deformFlag = -1;
+            rotateFlag = -1;
+            scaleFlag = -1;
         }
     }
 
 }
 void shokika() {
 
-    if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) { //どの操作もしていないなら
+    if (deformFlag == -1 && rotateFlag == -1 && scaleFlag == -1) { //どの操作もしていないなら
 
         printf("initialize!!!");
-        movingFlag = -3;
-        rotatingFlag = -3;
-        scalingFlag = -3;
+        deformFlag = -2;
+        rotateFlag = -2;
+        scaleFlag = -2;
         switch (shape)
         {
         case ball:
@@ -530,9 +459,9 @@ void shokika() {
             break;
         }
         Sleep(800);
-        movingFlag = -1;
-        rotatingFlag = -1;
-        scalingFlag = -1;
+        deformFlag = -1;
+        rotateFlag = -1;
+        scaleFlag = -1;
     }
 
 }
@@ -563,12 +492,12 @@ void kirikae(HandList handList) {
 
     double swichPolygon[2] = { Rposi1.distanceTo(Lposi4),Lposi1.distanceTo(Rposi4) };//人差し指と薬指の距離
 
-    if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) { //どの操作もしていないなら
+    if (deformFlag == -1 && rotateFlag == -1 && scaleFlag == -1) { //どの操作もしていないなら
         if (swichPolygon[0] < 4 || swichPolygon[1] < 4) {   //薬指と人差し指が近づいたら
             printf("switch!!!");
-            movingFlag = -1;
-            rotatingFlag = -1;
-            scalingFlag = -1;
+            deformFlag = -2;
+            rotateFlag = -2;
+            scaleFlag = -2;
             switch (shape)
             {
             case ball:
@@ -584,20 +513,20 @@ void kirikae(HandList handList) {
                 break;
             }
             Sleep(800);
-            movingFlag = -1;
-            rotatingFlag = -1;
-            scalingFlag = -1;
+            deformFlag = -1;
+            rotateFlag = -1;
+            scaleFlag = -1;
         }
     }
 }
 void kirikae(int i) {
 
     
-    if (movingFlag == -1 && rotatingFlag == -1 && scalingFlag == -1) { //どの操作もしていないなら
+    if (deformFlag == -1 && rotateFlag == -1 && scaleFlag == -1) { //どの操作もしていないなら
         printf("switch!!!");
-        movingFlag = -1;
-        rotatingFlag = -1;
-        scalingFlag = -1;
+        deformFlag = -2;
+        rotateFlag = -2;
+        scaleFlag = -2;
 
         if (i <0) {
             int tmp = (int)shape;
@@ -620,9 +549,9 @@ void kirikae(int i) {
             break;
         }
         Sleep(800);
-        movingFlag = -1;
-        rotatingFlag = -1;
-        scalingFlag = -1;
+        deformFlag = -1;
+        rotateFlag = -1;
+        scaleFlag = -1;
     }
 }
 
@@ -631,44 +560,7 @@ void kirikae(int i) {
 **************************************/
 void easyHenkei(Hand hand) {
     
-    /********************************************
-    * 手の情報を処理
-    ********************************************/
-    Vector handCenter = hand.palmPosition();
-    FingerList fingerList = hand.fingers();// handの指の情報を取得する
-
-    Vector posi0, posi1;
-    Vector Center = { 0,0,0 };
-
-    double pick = 100;
-
-    //個別の手の情報を出力する
-    //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
-    // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
-    for (int j = 0; j < fingerList.count(); j++) {
-        Finger finger = fingerList[j];
-        Vector currentPosition = finger.tipPosition();
-
-        if (j == 0) {
-            posi0 = currentPosition / 8;
-            posi0.y -= 30;
-            posi0.z += 8;
-        }
-        else if (j == 1) {
-            posi1 = currentPosition / 8;
-            posi1.y -= 30;
-            posi1.z += 8;
-        }
-
-        //個別の指の情報を出力する
-        // printf("    finger[%d] (%6.1f,%6.1f,%6.1f)\n",
-        //   j, currentPosition.x , currentPosition.y, currentPosition.z);
-    }
-
-    Center = (posi0 + posi1) / 2;
-    pick = posi0.distanceTo(posi1);
-    pointer[0] = Center / 2;
-
+    double pick = getPick(hand,0);
     double dist = 100;
 
     /* 変形量計算 */
@@ -677,115 +569,71 @@ void easyHenkei(Hand hand) {
 
     printf("scale::%f\n", scale);
 
-    if (rotatingFlag == -1 && movingFlag == -1 || movingFlag == 9999) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
-        if (pick < 4) {
-            if (movingFlag == -1) { printf("Transform Start!!\n"); }
-            movingFlag = 9999;
+    if (rotateFlag == -1 && scaleFlag == -1 && pick <= 4 || deformFlag == 1) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
 
-            for (int i = 0; i < pointRowNum;i++) {
-                for (int j = 0; j < pointColNum; j++) {
+        if (deformFlag == -1) { printf("Transform Start!!\n"); }
+        deformFlag = 1;
 
-                    
+        for (int i = 0; i < pointRowNum; i++) {
+            for (int j = 0; j < pointColNum; j++) {
 
-                    /* ポリゴンの形ごとに特殊な処理が必要な場合 */
-                    switch (shape) {
-                    case ball:
-                        /* スパイクするように点を動かす */
-                        if ((i + j + 1) % 2 == 0 && (i + 1) % 2 == 0) {
 
-                            point[i][j] = prePoint[i][j] * scale;
-                        }
-                        break;
-                    case cube:
-                        /* つぶれるように点を動かす */
-                       
+
+                /* ポリゴンの形ごとに特殊な処理が必要な場合 */
+                switch (shape) {
+                case ball:
+                    /* スパイクするように点を動かす */
+                    if ((i + j + 1) % 2 == 0 && (i + 1) % 2 == 0) {
+
+                        point[i][j] = prePoint[i][j] * scale;
+                    }
+                    break;
+                case cube:
+                    /* つぶれるように点を動かす */
+
+
+                    point[i][j].x = prePoint[i][j].x * scale;
+                    point[i][j].z = prePoint[i][j].z * scale;
+
+                    point[i][j].y = prePoint[i][j].y / (scale);
+
+                    break;
+                case hexagon:
+                    if (j % 2) {
 
                         point[i][j].x = prePoint[i][j].x * scale;
-                        point[i][j].z = prePoint[i][j].z * scale;
-
-                        point[i][j].y = prePoint[i][j].y / (scale );
-                        
-                        break;
-                    case hexagon:
-                        if (j % 2) {
-
-                            point[i][j].x = prePoint[i][j].x * scale;
-                            point[i][j].y = prePoint[i][j].y * scale;
-                        }
-                        else {
-                            point[i][j].x = prePoint[i][j].x / scale;
-                            point[i][j].y = prePoint[i][j].y / scale;
-                        }
-                        break;
-                    default:
-                        break;
+                        point[i][j].y = prePoint[i][j].y * scale;
                     }
-
-
+                    else {
+                        point[i][j].x = prePoint[i][j].x / scale;
+                        point[i][j].y = prePoint[i][j].y / scale;
+                    }
+                    break;
+                default:
+                    break;
                 }
+
+
             }
-
-
         }
-        else {
-            if (pick >= 4) {
-                if (movingFlag == 0) { printf("Transform Finished!!!\n"); }
-                movingFlag = -1;
-            }
 
-        }
+
 
     }
-    else {
-        if (pick >= 4) {
-            movingFlag = -1;
-        }
-
+    if(pick > 4 && deformFlag == 1) {
+        printf("Transform Finished!!!\n");
+        deformFlag = -1;
+        
     }
 }
 void easyKaitenKakudai(Hand hand) {
     
-    /********************************************
-    * 手の情報を処理
-    ********************************************/
-    Vector handCenter = hand.palmPosition();
-    FingerList fingerList = hand.fingers();// handの指の情報を取得する
+    double pick = getPick(hand,1);
 
-    Vector posi0, posi1;
-    Vector Center = { 0,0,0 };
-
-    double pick = 100;
-
-    //個別の手の情報を出力する
-    //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
-    // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
-    for (int j = 0; j < fingerList.count(); j++) {
-        Finger finger = fingerList[j];
-        Vector currentPosition = finger.tipPosition();
-
-        if (j == 0) {
-            posi0 = currentPosition / 8;
-            posi0.y -= 30;
-            posi0.z += 8;
-        }
-        else if (j == 1) {
-            posi1 = currentPosition / 8;
-            posi1.y -= 30;
-            posi1.z += 8;
-        }
-
-        //個別の指の情報を出力する
-        // printf("    finger[%d] (%6.1f,%6.1f,%6.1f)\n",
-        //   j, currentPosition.x , currentPosition.y, currentPosition.z);
-    }
-
-    Center = (posi0 + posi1) / 2;
-    pick = posi0.distanceTo(posi1);
-    pointer[1] = Center / 2;
-
-    if (movingFlag == -1 && pick < 4 || rotatingFlag == 1) {
-        if (rotatingFlag == -1) { printf("Rotation Start!!!\n"); }
-        rotatingFlag = 1;
+    if (deformFlag == -1 && pick <= 4 || (rotateFlag == -1 && scaleFlag == 2)) {
+        if (rotateFlag == -1 && scaleFlag == -1) { printf("Rotation and Scaling Start!!!\n"); }
+        rotateFlag = 1;
+        scaleFlag = 2;
         /* 拡大倍率を計算 */
         double scale = 1 + (pointer[1].y - prePointer[1].y) / 30;
         /* 移動量を計算 */
@@ -810,12 +658,51 @@ void easyKaitenKakudai(Hand hand) {
             }
         }
     }
-
-    if (pick >= 4 && rotatingFlag == 1) {
-        rotatingFlag = -1;
-        printf("Rotation Finished!!\n");
+    if(pick > 4 && rotateFlag == 1 && scaleFlag == 2) {
+        rotateFlag = -1;
+        scaleFlag = -1;
+        
+        printf("Rotation and Scaling Finished!!\n");
     }
-    
 
 }
+double getPick(Hand hand,int handNum) {
+    /********************************************
+    * 手の情報を処理
+    ********************************************/
+    Vector handCenter = hand.palmPosition();
+    FingerList fingerList = hand.fingers();// handの指の情報を取得する
 
+    Vector posi0, posi1;
+    Vector Center = { 0,0,0 };
+
+    double pick = 100;
+
+    //個別の手の情報を出力する
+    //printf("  hand[%d] (%6.1f,%6.1f,%6.1f), fingers:%d\n",
+    // i, handCenter.x, handCenter.y, handCenter.z, fingerList.count());
+    for (int j = 0; j < fingerList.count(); j++) {
+        Finger finger = fingerList[j];
+        Vector currentPosition = finger.tipPosition();
+
+        if (j == 0) {
+            posi0 = currentPosition / 8;
+            posi0.y -= 30;
+            posi0.z += 8;
+        }
+        else if (j == 1) {
+            posi1 = currentPosition / 8;
+            posi1.y -= 30;
+            posi1.z += 8;
+        }
+
+        //個別の指の情報を出力する
+        // printf("    finger[%d] (%6.1f,%6.1f,%6.1f)\n",
+        //   j, currentPosition.x , currentPosition.y, currentPosition.z);
+    }
+
+    Center = (posi0 + posi1) / 2;
+    pick = posi0.distanceTo(posi1);
+    pointer[handNum] = Center / 2;
+    return pick;
+}

@@ -31,6 +31,8 @@ void shokika(HandList handList);
 
 void kirikae(HandList handList);
 
+double getPick(Hand hand,int handNum);
+
 /* 簡単モード */
 void easyHenkei(Hand hand);
 void easyKaitenKakudai(Hand hand);

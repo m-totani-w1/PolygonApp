@@ -44,9 +44,9 @@ Vector nearestPoint = { 100,100,100 };/* ポインターに最も近い頂点 */
 
 bool easyMode = true;       /* 簡単モード */
 
-int movingFlag = -1;        /* 変形のフラグ*/
-int rotatingFlag = -1;      /* 回転のフラグ */
-int scalingFlag = -1;       /* 拡大・縮小のフラグ */
+int deformFlag = -1;        /* 変形のフラグ*/
+int rotateFlag = -1;      /* 回転のフラグ */
+int scaleFlag = -1;       /* 拡大・縮小のフラグ */
 
 
 unsigned char image[400][640][3];       /* 背景の画像 */

@@ -135,25 +135,32 @@ void display(void)
     /* 地面のひょうじ　*/
     Ground();
 
-    
+    glPointSize(10);
+    glBegin(GL_POINTS);
     double dist = nearestPoint.distanceTo(pointer[0]);
-    double c = (dist <= 0.4) ? 1 : pow(0.4 / (dist), 5);
-    if (movingFlag != -1) {
-        
-        glColor3f(c,0 , 0);
+    double c = -dist *(0.1)  + 1;
+    if (deformFlag != -1) {
+        glColor3f(c,0 , 1);
+        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
+        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
     }
-    else if (rotatingFlag != -1) {
-        glColor3f(1, 1, 0);
+    else if (rotateFlag != -1) {
+        glColor3f(0, 1, 1);
+        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
+        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
     }
-    else if (scalingFlag != -1) {
+    else if (scaleFlag != -1) {
         glColor3f(1, 1, 1);
+        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
+        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
     }
     else {
         glColor3f(0, 0, 0);
+        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
+        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
     }
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
+    
+    
     glEnd();
 
     if (dist < 10) {
@@ -179,19 +186,19 @@ void display(void)
             for (int j = 0; j < longitudeNUM; j++) {
                 int k = i + j * 2;
                 if ( k % 5 == 0) {
-                    glColor3f(0,1, 0.1);
+                    glColor3f(0.5,1, 0.1);
                 }
                 else if(k % 5 == 1) {
-                    glColor3f(0.0, 0.9, 0.2);
+                    glColor3f(0.5, 0.9, 0.2);
                 }
                 else if (k % 5 == 2) {
-                    glColor3f(0.0, 0.80, 0.3);
+                    glColor3f(0.5, 0.80, 0.3);
                 }
                 else if (k % 5 == 3) {
-                    glColor3f(0.0, 0.7, 0.4);
+                    glColor3f(0.5, 0.7, 0.4);
                 }
                 else if (k % 5 == 4) {
-                    glColor3f(0.0, 0.6, 0.5);
+                    glColor3f(0.5, 0.6, 0.5);
                 }
                 else {
                     glColor3f(0, 0, 0);
@@ -207,19 +214,19 @@ void display(void)
         for (int j = 0; j < longitudeNUM; j++) {
             int k = j * 2;
             if (k % 5 == 0) {
-                glColor3f(0, 1, 0.1);
+                glColor3f(0.5, 1, 0.1);
             }
             else if (k % 5 == 1) {
-                glColor3f(0.0, 0.9, 0.2);
+                glColor3f(0.5, 0.9, 0.2);
             }
             else if (k % 5 == 2) {
-                glColor3f(0.0, 0.80, 0.3);
+                glColor3f(0.5, 0.80, 0.3);
             }
             else if (k % 5 == 3) {
-                glColor3f(0.0, 0.7, 0.4);
+                glColor3f(0.5, 0.7, 0.4);
             }
             else if (k % 5 == 4) {
-                glColor3f(0.0, 0.6, 0.5);
+                glColor3f(0.5, 0.6, 0.5);
             }
             else {
                 glColor3f(0, 0, 0);

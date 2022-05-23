@@ -40,9 +40,9 @@ extern Vector nearestPoint;	/* ポインターに最も近い頂点 */
 
 extern bool easyMode;	/* 簡単モード */
 
-extern int movingFlag;        /* 変形のフラグ*/
-extern int rotatingFlag;      /* 回転のフラグ */
-extern int scalingFlag;       /* 拡大・縮小のフラグ */
+extern int deformFlag;        /* 変形のフラグ*/
+extern int rotateFlag;      /* 回転のフラグ */
+extern int scaleFlag;       /* 拡大・縮小のフラグ */
 
 
 extern unsigned char image[400][640][3];       /* 背景の画像 */
