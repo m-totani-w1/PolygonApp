@@ -39,11 +39,22 @@ void Ground(void) {
     glBegin(GL_QUADS);
     for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5) {
         for (double lz = -ground_max_z; lz <= ground_max_z; lz += 5) {
-            if ((int)(lx+((int)lz)%2+1) % 2) {
-                glColor3d(0.7, 0.7, 0.7);  // 大地の色(白色)
+            
+            if (easyMode) {
+                if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
+                    glColor3d(0.7, 0.7, 0.7);  // 大地の色(1)
+                }
+                else {
+                    glColor3d(0.4, 0.4, 0.4);  // 大地の色(2)
+                }
             }
             else {
-                glColor3d(0.4, 0.4, 0.4);  // 大地の色(白色)
+                if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
+                    glColor3d(0.7, 0.7, 0.9);  // 大地の色(1)
+                }
+                else {
+                    glColor3d(0.4, 0.4, 0.5);  // 大地の色(2)
+                }
             }
             //glColor3d(1, 1, 1);  // 大地の色(白色)
             //glColor3d(0.52, 0.29, 0.17);  // 大地の色(茶色)
@@ -67,32 +78,33 @@ void Ground(void) {
     //glVertex3d(-ground_max_x, ground_max_y, -ground_max_z - 0.1);
     //glEnd();
 
+    glRasterPos3i(-ground_max_x-0.99, -15, -ground_max_z);
+    glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
+    glRasterPos3i(0, -15, -ground_max_z);
     glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
     
 
     glColor3d(0, 0, 0);  // 大地の線の色
     glBegin(GL_LINES);
-    /*地面*/
+    /*地面の罫線*/
     for (double lz = -ground_max_z; lz <= ground_max_z; lz += 5) {
         glVertex3d(-ground_max_x,-15,lz);
         glVertex3d(ground_max_x,-15,lz);
         
-        
-
     }
     for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5) {
         glVertex3d(lx,-15, ground_max_z);
         glVertex3d(lx,-15, -ground_max_z);
     }
-    /*奥の壁*/
-    for (double ly = -15; ly <= ground_max_y*2; ly += 5.0) {
-        glVertex3d(-ground_max_x, ly, -ground_max_z);
-        glVertex3d(ground_max_x, ly, -ground_max_z);
-    }
-    for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5.0) {
-        glVertex3d(lx, -15, -ground_max_z);
-        glVertex3d(lx, ground_max_y*2, -ground_max_z);
-    }
+    /*奥の壁の線*/
+    //for (double ly = -15; ly <= ground_max_y*2; ly += 5.0) {
+    //    glVertex3d(-ground_max_x, ly, -ground_max_z);
+    //    glVertex3d(ground_max_x, ly, -ground_max_z);
+    //}
+    //for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5.0) {
+    //    glVertex3d(lx, -15, -ground_max_z);
+    //    glVertex3d(lx, ground_max_y*2, -ground_max_z);
+    //}
     
     glEnd();
     
@@ -124,7 +136,7 @@ void display(void)
     Ground();
 
     
-    double dist = nearestPoint.distanceTo(pointer);
+    double dist = nearestPoint.distanceTo(pointer[0]);
     double c = (dist <= 0.4) ? 1 : pow(0.4 / (dist), 5);
     if (movingFlag != -1) {
         
@@ -141,7 +153,7 @@ void display(void)
     }
     glPointSize(10);
     glBegin(GL_POINTS);
-    glVertex3f(pointer.x, pointer.y, pointer.z );
+    glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
     glEnd();
 
     if (dist < 10) {
@@ -341,6 +353,7 @@ void keyboard(unsigned char key, int x, int y)
     case 'm':/* 操作モード変更 */
         if (easyMode) {
             easyMode = false;
+            nearestPoint = { 100,100,100 };
         }
         else {
             easyMode = true;
@@ -356,6 +369,7 @@ void keyboard(unsigned char key, int x, int y)
         exit(0);      /* プログラム終了 */
         break;
     }
+    Sleep(800);
 
     /* 描画要求（直後に display() 関数が呼ばれる） */
     glutPostRedisplay();
@@ -467,7 +481,7 @@ void myInit(char* windowTitle)
     glutInitWindowSize(winWidth, winHeight);        /* ウインドウサイズ */
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);   /* 描画モード */
     glutCreateWindow(windowTitle);                  /* ウインドウの表示 */
-    glClearColor(1.0, 1.0, 1.0, 1.0);              /* 画面消去色の設定 */
+    glClearColor(0, 0, 0, 1.0);              /* 画面消去色の設定 */
 
     
 
@@ -491,6 +505,7 @@ void myInit(char* windowTitle)
     
 
     glEnable(GL_DEPTH_TEST);        /* 隠面消去を有効にする */
+
     /* 画像の読込 */
     ppm_read("universe.ppm", &image[0][0][0]);
 }

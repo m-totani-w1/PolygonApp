@@ -25,11 +25,14 @@ extern Screen screen;
 void CleanupExit();
 
 void henkei(Hand hand);
-void easyHenkei(Hand hand);
 void kaiten(Hand hand);
-void easyKaitenKakudai(Hand hand);
 void kakudai(HandList handList);
 void shokika(HandList handList);
-void shokika();
+
 void kirikae(HandList handList);
+
+/* 簡単モード */
+void easyHenkei(Hand hand);
+void easyKaitenKakudai(Hand hand);
+void shokika();
 void kirikae(int i);

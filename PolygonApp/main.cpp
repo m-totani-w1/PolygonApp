@@ -36,11 +36,11 @@ int pointColNum = 0;            /* 頂点の数（列） */
    
 polygon shape;      /* polygonの形 */
 
-Vector pointer = { 100,100,100 };   /* 変形させる際のポインターの位置 */
-Vector prePointer = { 100,100,100 };        /* 1つ前のポインターの位置 */
+Vector pointer[2] = { {100,100,100} ,{100,100,100} };   /* 変形させる際のポインターの位置 */
+Vector prePointer[2] = { {100,100,100} ,{100,100,100} };        /* 1つ前のポインターの位置 */
 Vector nearestPoint = { 100,100,100 };/* ポインターに最も近い頂点 */
-Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
-Vector rotateNow = { 0,-999,0 };    /* 回転させる際の指の現在位置　 */
+//Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
+//Vector rotateNow = { 0,-999,0 };    /* 回転させる際の指の現在位置　 */
 
 bool easyMode = true;       /* 簡単モード */
 
