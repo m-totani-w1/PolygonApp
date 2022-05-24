@@ -131,10 +131,10 @@ void display(void)
     /* 地面のひょうじ　*/
     Ground();
 
+    /* shadowCube用の変数 */
     GLfloat color[4] = { 0,0,0,1 };
-    GLdouble normal[3] = { 0,0,0 };
-
-    Vector tmpNormal;
+    Vector normal = {0,0,1};
+    GLfloat shadowCube_color[] = { 0.1, 0.1, 0.6, 1.0 };;
 
     glPointSize(10);
     glBegin(GL_POINTS);
@@ -298,107 +298,101 @@ void display(void)
         break;
 
     case hexagon:
-        glPointSize(20);
-        glColor3f(0.1, 0.8, 0.1);
+        glPointSize(25);
+        glLineWidth(15);
         glBegin(GL_POINTS);
-        glColor3f(0.6, 1.0, 0.8);        
+
+        glColor3f(0.8, 0.8, 0.1);
         for (int i = 0; i < 6; i++) {
             glVertex3f(point[0][i].x, point[0][i].y, point[0][i].z);
         }
         glEnd();
-
+        glColor3f(0.1, 0.8, 0.1);
         glBegin(GL_LINE_LOOP);
         for (int i = 0; i < 6; i++) {
             glVertex3f(point[0][i].x, point[0][i].y, point[0][i].z);
         }
         glEnd();
+        glLineWidth(1);
         break;
     case shadowCube:
         //陰影ON-----------------------------
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);//光源0を利用
         //-----------------------------------
-        //色
-        color[0] = 1;
-        color[1] = 1;
-        color[2] = 1;
-        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
-        glBegin(GL_QUADS);
         
-        /*　上面　*/
-        //垂線の向き
-        tmpNormal = point[0][0] - point[1][0];
-        normal[0] = tmpNormal.x;
-        normal[1] = tmpNormal.y;
-        normal[2] = tmpNormal.z;
-        glNormal3dv(normal);
+        
+        //glPushMatrix();                /* 描画位置を保存 */
+        //glColor3f(0.0, 1.0, 0.0);       /* 描画色を白にする */
+        //glTranslatef(10.0, 0.0, -10.0);    /* 描画位置をX方向に1.0移動 */
+        //glRotatef(BoxRotate, RotateAxis.x, RotateAxis.y, RotateAxis.z);   /* BoxRotate(度)回転 */
+        //glutSolidCube(length);         /* 立方体を描画 */
+        //glPopMatrix();                 /* 描画位置を戻す */
 
+        
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, shadowCube_color);
+        /*　上面　*/
+        /* 垂線の計算 */
+        normal = (point[0][0] - point[0][1]).cross(point[0][1] - point[0][2]);
+        normal = normal/normal.magnitude();
+        glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
+
+        glBegin(GL_QUADS);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
-        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
+        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
+        glEnd();
+
+        glBegin(GL_QUADS);
 
         /*　下面　*/
-        //垂線の向き
-        tmpNormal = point[1][0] - point[0][0];
-        normal[0] = tmpNormal.x;
-        normal[1] = tmpNormal.y;
-        normal[2] = tmpNormal.z;
-        glNormal3dv(normal);
-
-        glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
-        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        normal = (point[1][3] - point[1][2]).cross(point[1][2] - point[1][1]);
+        normal = normal / normal.magnitude();
+        glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
 
         /*　正面　*/
-        //垂線の向き
-        tmpNormal = point[0][0] - point[0][1];
-        normal[0] = tmpNormal.x;
-        normal[1] = tmpNormal.y;
-        normal[2] = tmpNormal.z;
-        glNormal3dv(normal);
+        normal = (point[0][0] - point[0][3]).cross(point[0][3] - point[1][3]);
+        normal = normal / normal.magnitude();
+        glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
-        glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
-        glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
+        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
 
         /*　背面　*/
-        tmpNormal = point[0][1] - point[0][0];
-        normal[0] = tmpNormal.x;
-        normal[1] = tmpNormal.y;
-        normal[2] = tmpNormal.z;
-        glNormal3dv(normal);
-
-        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
-        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
-        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
+        normal = (point[1][1] - point[1][2]).cross(point[1][2] - point[0][2]);
+        normal = normal / normal.magnitude();
+        glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
+        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
 
         /*　右側面　*/
-        tmpNormal = point[0][0] - point[0][2];
-        normal[0] = tmpNormal.x;
-        normal[1] = tmpNormal.y;
-        normal[2] = tmpNormal.z;
-        glNormal3dv(normal);
-
+        normal = (point[0][0] - point[1][0]).cross(point[1][0] - point[1][1]);
+        normal = normal / normal.magnitude();
+        glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
-        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
-        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
+        glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
+        glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         /*　左側面　*/
-        tmpNormal = point[0][2] - point[0][0];
-        normal[0] = tmpNormal.x;
-        normal[1] = tmpNormal.y;
-        normal[2] = tmpNormal.z;
-        glNormal3dv(normal);
-
+        normal = (point[0][2] - point[1][2]).cross(point[1][2] - point[1][3]);
+        normal = normal / normal.magnitude();
+        glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
-        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
-        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
+        glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
+        glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
+
         glEnd();
 
+        
         //陰影OFF-----------------------------
         glDisable(GL_LIGHTING);
         //-----------------------------------
@@ -406,13 +400,6 @@ void display(void)
     default:
         break;
     }
-
-    
-
-
-
-    
-
 
     /* 上記で描画されたCGをモニターに出力 */
     glutSwapBuffers();
@@ -431,7 +418,7 @@ void timer(int timerID)
     glutTimerFunc(15, timer, 0);
 
     /* オブジェクトの回転角度を1.0度ずつ増加させる */
-    //BoxRotate += 1;
+    BoxRotate += 1;
     
     
     if (BoxRotate > 360.0) BoxRotate -= 360.0;
@@ -469,11 +456,23 @@ void keyboard(unsigned char key, int x, int y)
     case 's':
         kirikae(1);      /* 切替 */
         break;
+    case 'h':
+        InitHexagon();
+        break;
+    case 'c':
+        InitCube();
+        break;
+    case 'b':
+        InitBall();
+        break;
     case 'q':
         exit(0);      /* プログラム終了 */
         break;
+    case 'r':
+        autoKaiten();      /* プログラム終了 */
+        break;
     }
-    Sleep(800);
+    Sleep(10);
 
     /* 描画要求（直後に display() 関数が呼ばれる） */
     glutPostRedisplay();
@@ -590,13 +589,15 @@ void myInit(char* windowTitle)
     
 
     //光源の設定--------------------------------------
-    GLfloat light_position0[] = { -10, 0, 10, 1.0 }; //光源0の座標
+    GLfloat light_position0[] = { CameraX, CameraY + 10, CameraZ, 1.0 }; //光源0の座標
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0); //光源0を
+    GLfloat ambient[] = { 0.7, 0.7, 0.9, 1.0 };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
     /* イベント発生時に呼び出す関数の登録 */
     glutKeyboardFunc(keyboard);     /* キーボードを押した時 */
     glutMouseFunc(mouseButton);  /* マウスボタンを押した時*/
-    glutMotionFunc(mouseDrag);    /* マウスドラッグした時 */
+    //glutMotionFunc(mouseDrag);    /* マウスドラッグした時 */
     glutDisplayFunc(display);      /* 画面表示 */
     glutTimerFunc(15, timer, 0);    /* タイマーを15ミリ秒後に設定 */
 

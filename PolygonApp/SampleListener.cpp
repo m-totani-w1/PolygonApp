@@ -461,8 +461,7 @@ void shokika() {
             InitHexagon();
             break;
         case shadowCube:
-            InitCube();
-            shape = shadowCube;
+            InitShadowCube();
             break;
         default:
             break;
@@ -516,6 +515,9 @@ void kirikae(HandList handList) {
                 InitHexagon();
                 break;
             case hexagon:
+                InitShadowCube();
+                break;
+            case shadowCube:
                 InitBall();
                 break;
             default:
@@ -552,8 +554,7 @@ void kirikae(int i) {
             InitHexagon();
             break;
         case hexagon:
-            InitCube();
-            shape = shadowCube;
+            InitShadowCube();
             break;
         case shadowCube:
             InitBall();
@@ -620,6 +621,16 @@ void easyHenkei(Hand hand) {
                         point[i][j].x = prePoint[i][j].x / scale;
                         point[i][j].y = prePoint[i][j].y / scale;
                     }
+                    break;
+                case shadowCube:
+                    /* つぶれるように点を動かす */
+
+
+                    point[i][j].x = prePoint[i][j].x / scale;
+                    point[i][j].z = prePoint[i][j].z * scale;
+
+                    point[i][j].y = prePoint[i][j].y / (scale);
+
                     break;
                 default:
                     break;

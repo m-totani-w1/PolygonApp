@@ -21,12 +21,12 @@ int   xBegin = 0;               /* マウスドラッグの始点X座標 */
 int   yBegin = 0;               /* マウスドラッグの始点Y座標 */
 int   PressButton = 0;          /* 現在押されているマウスボタン（1:左,2:中,3:右） */
 float CameraAzimuth = 90.0;   /* カメラの位置（方位角） */
-float CameraElevation = 0.0;    /* カメラの位置（仰角） */
+float CameraElevation = -10.0;    /* カメラの位置（仰角） */
 float CameraDistance = 25.0;    /* カメラの位置（原点からの距離） */
 float CameraX = 0.0;            /* カメラの位置（X座標） */
 float CameraY = 10.0;            /* カメラの位置（Y座標） */
 float CameraZ = 25.0;            /* カメラの位置（Z座標） */
-float BoxRotate = 0.0;          /* 箱の回転角 */
+
 
 Vector point[20][20] = {};      /* 頂点の座標 */
 Vector prePoint[20][20] = {};   /* 以前の頂点の座標 */
@@ -39,8 +39,6 @@ polygon shape;      /* polygonの形 */
 Vector pointer[2] = { {100,100,100} ,{100,100,100} };   /* 変形させる際のポインターの位置 */
 Vector prePointer[2] = { {100,100,100} ,{100,100,100} };        /* 1つ前のポインターの位置 */
 Vector nearestPoint = { 100,100,100 };/* ポインターに最も近い頂点 */
-//Vector rotateStart = { 0,0,0 };     /* 回転させる際の指のスタート位置 */
-//Vector rotateNow = { 0,-999,0 };    /* 回転させる際の指の現在位置　 */
 
 bool easyMode = true;       /* 簡単モード */
 
@@ -65,6 +63,11 @@ const double length = 10;
 
 /* 六角形 */
 const double radiusHexagon = 6;
+
+/* 陰影立方体 */
+float BoxRotate = 0.0;          /* 箱の回転角 */
+double lengthS = 10;
+Vector RotateAxis = { 1,0,1 };
 
 
 

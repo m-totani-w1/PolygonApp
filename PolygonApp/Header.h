@@ -23,7 +23,7 @@ extern float CameraDistance;    /* カメラの位置（原点からの距離）
 extern float CameraX;            /* カメラの位置（X座標） */
 extern float CameraY;            /* カメラの位置（Y座標） */
 extern float CameraZ;            /* カメラの位置（Z座標） */
-extern float BoxRotate;          /* 箱の回転角 */
+
 
 extern Vector point[20][20];      /* 頂点の座標 */
 extern Vector prePoint[20][20];   /* 以前の頂点の座標 */
@@ -35,8 +35,6 @@ extern polygon shape;      /* polygonの形 */
 extern Vector pointer[2];   /* 変形させる際のポインターの位置 */
 extern Vector prePointer[2];        /* 1つ前のポインターの位置 */
 extern Vector nearestPoint;	/* ポインターに最も近い頂点 */
-//extern Vector rotateStart;     /* 回転させる際の指のスタート位置 */
-//extern Vector rotateNow;    /* 回転させる際の指の現在位置　 */
 
 extern bool easyMode;	/* 簡単モード */
 
@@ -61,6 +59,11 @@ extern const double length;
 
 /* 六角形 */
 extern const double radiusHexagon;                    /* 六角形の半径 */
+
+/* 陰影立方体 */
+extern float BoxRotate;          /* 箱の回転角 */
+extern double lengthS;
+extern Vector RotateAxis;
 
 /*************************
 * 便利な関数

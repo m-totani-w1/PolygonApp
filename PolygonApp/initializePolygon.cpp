@@ -106,6 +106,32 @@ void InitHexagon() {
     }
 }
 
+/*********************************************************
+*
+*   陰影立方体
+*
+**********************************************************/
+
+void InitShadowCube() {
+    clearPoint();
+
+    shape = shadowCube;
+
+    /* 頂点の個数を更新*/
+    pointRowNum = 2;
+    pointColNum = 4;
+
+    /**/
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 4; j++) {
+            point[i][j].y = length / 2 * ((i == 0) ? 1 : -1);
+            point[i][j].x = length / 2 * ((j == 0 || j == 1) ? 1 : -1);
+            point[i][j].z = length / 2 * ((j == 0 || j == 3) ? 1 : -1);
+            printf("point[%d][%d](x:%2.4f,y:%2.4f,z:%2.4f)\n", i, j, point[i][j].x, point[i][j].y, point[i][j].z);
+        }
+    }
+
+}
 void clearPoint() {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 20; j++) {
