@@ -460,6 +460,10 @@ void shokika() {
         case hexagon:
             InitHexagon();
             break;
+        case shadowCube:
+            InitCube();
+            shape = shadowCube;
+            break;
         default:
             break;
         }
@@ -548,10 +552,11 @@ void kirikae(int i) {
             InitHexagon();
             break;
         case hexagon:
-            InitBall();
+            InitCube();
+            shape = shadowCube;
             break;
         case shadowCube:
-
+            InitBall();
         default:
             break;
         }

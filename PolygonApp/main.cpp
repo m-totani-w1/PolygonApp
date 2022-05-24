@@ -24,7 +24,7 @@ float CameraAzimuth = 90.0;   /* カメラの位置（方位角） */
 float CameraElevation = 0.0;    /* カメラの位置（仰角） */
 float CameraDistance = 25.0;    /* カメラの位置（原点からの距離） */
 float CameraX = 0.0;            /* カメラの位置（X座標） */
-float CameraY = 5.0;            /* カメラの位置（Y座標） */
+float CameraY = 10.0;            /* カメラの位置（Y座標） */
 float CameraZ = 25.0;            /* カメラの位置（Z座標） */
 float BoxRotate = 0.0;          /* 箱の回転角 */
 
