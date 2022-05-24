@@ -1,0 +1,33 @@
+プログラムを動かすには以下の3つのインストールが必要。
+
+<<<<<mingwのインストール>>>>>
+  次のサイトから”x86_64-posix-seh”をダウンロードし、解凍する。
+  解凍後のフォルダ“mingw64”を”C:\Program File”の下に追加する。
+
+    ダウンロード用URL
+      URL：https://sourceforge.net/projects/mingw-w64/files/
+
+ 
+<<<<<freeglutのインストール>>>>>
+  次のサイトから"Freeglut2.8.1"をダウンロードして解凍する。
+  解凍したフォルダ(freeglut-2.8.1)を”C:\Program Files\mingw64”の下に移動する。
+  
+    ダウンロード用URL
+        http://freeglut.sourceforge.net/
+               
+
+<<<<<leap motion APIのインストール>>>>>＊APIはSDK Version2を利用する。
+  次のサイトから”TRACKING SOFTWARE WINDOWS 2.3.1”をダウンロードする。
+  ダウンロード後のフォルダ”LeapDeveloperKit_2.3.1+31549_win”を”C:\Program Files\Ultraleap”の下に移動する。＊無ければ作る。
+  
+  ダウンロード用URL
+      https://developer.leapmotion.com/releases/windows-2-3-1
+      
+      
+  
+<<<<<leap motion ドライバのインストール>>>>>＊ドライバはSDK Version3を利用する。
+  次のサイトから"LEAP MOTION ORION 3.2.1"をダウンロードする。
+  ダウンロード後、フォルダ内の”Leap_Motion_Orion_Setup_win_3.2.1.exe”を実行する。
+  
+    ダウンロード用URL
+      https://developer.leapmotion.com/releases/leap-motion-orion-321-39frn-3b659
