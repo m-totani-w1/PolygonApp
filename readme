@@ -1,3 +1,6 @@
+------------------------------------------------------
+for Windows
+------------------------------------------------------
 プログラムを動かすには以下の4つのインストールが必要。
 
 <<<<<mingwのインストール>>>>>
@@ -16,7 +19,7 @@
         http://freeglut.sourceforge.net/
                
 
-<<<<<leap motion APIのインストール>>>>>＊APIはSDK Version2を利用する。
+<<<<<leap motion SDKのインストール>>>>>＊APIはSDK Version2を利用する。
   次のサイトから”TRACKING SOFTWARE WINDOWS 2.3.1”をダウンロードする。
   ダウンロード後のフォルダ”LeapDeveloperKit_2.3.1+31549_win”を”C:\Program Files\Ultraleap”の下に移動する。＊無ければ作る。
   
@@ -31,3 +34,14 @@
   
     ダウンロード用URL
       https://developer.leapmotion.com/releases/leap-motion-orion-321-39frn-3b659
+      
+------------------------------------------------------
+for Linux(Ubuntu)
+------------------------------------------------------
+プログラムを動かすには以下の3つのインストールが必要。
+*Ubuntu 12.xx LTS 以外での動作確認はできてないです。
+
+<<<<<freeglutのインストール>>>>>
+
+<<<<<leap motion SDKとドライバのインストール>>>>>
+
