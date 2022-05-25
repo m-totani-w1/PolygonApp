@@ -509,15 +509,15 @@ void kirikae(HandList handList) {
             switch (shape)
             {
             case ball:
+                InitShadowCube();
+                break;
+            case shadowCube:
                 InitCube();
                 break;
             case cube:
                 InitHexagon();
                 break;
             case hexagon:
-                InitShadowCube();
-                break;
-            case shadowCube:
                 InitBall();
                 break;
             default:
@@ -548,16 +548,17 @@ void kirikae(int i) {
         switch (shape)
         {
         case ball:
+            InitShadowCube();
+            break;
+        case shadowCube:
             InitCube();
             break;
         case cube:
             InitHexagon();
             break;
         case hexagon:
-            InitShadowCube();
-            break;
-        case shadowCube:
             InitBall();
+            break;
         default:
             break;
         }

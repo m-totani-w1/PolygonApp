@@ -254,41 +254,41 @@ void display(void)
         glBegin(GL_QUADS);
         
         /*　上面　*/
-        glColor3f(0, 0, 1);
+        glColor3f(0, 0, 0.8);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
         
         /*　下面　*/
-        glColor3f(0, 1, 1);
+        glColor3f(0, 0.8, 0.8);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
         
         /*　正面　*/
-        glColor3f(1, 0.5, 0.5);
+        glColor3f(0.8, 0.5, 0.5);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
         glVertex3f(point[1][2].x, point[1][2].y, point[1][2].z);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
 
         /*　背面　*/
-        glColor3f(1, 1, 0);
+        glColor3f(0.8, 0.8, 0);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
 
         /*　右側面　*/
-        glColor3f(1, 0, 0);
+        glColor3f(0.8, 0, 0);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
         glVertex3f(point[1][1].x, point[1][1].y, point[1][1].z);
         glVertex3f(point[1][0].x, point[1][0].y, point[1][0].z);
         /*　左側面　*/
-        glColor3f(0, 1, 0);
+        glColor3f(0, 0.8, 0);
         glVertex3f(point[0][2].x, point[0][2].y, point[0][2].z);
         glVertex3f(point[0][3].x, point[0][3].y, point[0][3].z);
         glVertex3f(point[1][3].x, point[1][3].y, point[1][3].z);
@@ -302,10 +302,12 @@ void display(void)
         glLineWidth(15);
         glBegin(GL_POINTS);
 
-        glColor3f(0.8, 0.8, 0.1);
+        glColor3f(0.1, 0.5, 0.1);
         for (int i = 0; i < 6; i++) {
+
             glVertex3f(point[0][i].x, point[0][i].y, point[0][i].z);
         }
+
         glEnd();
         glColor3f(0.1, 0.8, 0.1);
         glBegin(GL_LINE_LOOP);
