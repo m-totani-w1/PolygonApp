@@ -10,6 +10,7 @@ using namespace Leap;
 
 void SampleListener::onInit(const Controller& controller) {
     std::cout << "Initialized" << std::endl;
+    InitBall();
 }
 
 void SampleListener::onConnect(const Controller& controller) {
@@ -190,7 +191,7 @@ void henkei(Hand hand) {
             /* 摘まんだ点の周辺も動かす */
             double TFrate;
             TFrate = point[I][J].distanceTo(prePoint[I][J]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
-            TFrate = abs(TFrate) / (CameraDistance * 0.7);
+            TFrate = abs(TFrate) / (CameraDistance * 0.5);
             if (I == 0 || I == latitudeNUM) {   /* 摘まんだ点がpoleだった時 */
                 int lati1 = (I == 0) ? (1) : (latitudeNUM - 1);
                 int lati2 = (I == 0) ? (2) : (latitudeNUM - 2);
@@ -670,7 +671,7 @@ void easyKaitenKakudai(Hand hand) {
 
                 
                 ////* y軸周りに回転 *////
-                double RotateY = (point[i][j].x == 0) ? PI / 2 * sign(point[i][j].x) : atan((point[i][j].z / abs(point[i][j].x)));    /* 頂点の位置（y軸周りの角度） */
+                double RotateY = (point[i][j].x == 0) ? PI / 2 * sign(point[i][j].z) : atan((point[i][j].z / abs(point[i][j].x)));    /* 頂点の位置（y軸周りの角度） */
                 int XMark = (point[i][j].x < 0) ? -1 : 1;     /* ⅹの正負 */
                 double YDistance = (double)pow(point[i][j].z * point[i][j].z + point[i][j].x * point[i][j].x, 0.5);     /* y軸までの距離 */
 
@@ -692,8 +693,8 @@ void easyKaitenKakudai(Hand hand) {
 
 }
 void autoKaiten() {
-    if (deformFlag == -1) {
-        for (int i = 0; i < pointRowNum; i++) {
+    if (deformFlag == -1 && rotateFlag == -1 && scaleFlag == -1) {
+        for (int i = 0; i < pointRowNum+1; i++) {
             for (int j = 0; j < pointColNum; j++) {
 
 
@@ -709,12 +710,23 @@ void autoKaiten() {
                 point[i][j].z = XDistance * cos(RotateX) * ZMark;
 
 
+                ////* y軸周りに回転 *////
+                double RotateY = (point[i][j].x == 0) ? PI / 2 * sign(point[i][j].z) : atan((point[i][j].z / abs(point[i][j].x)));    /* 頂点の位置（y軸周りの角度） */
+                int XMark = (point[i][j].x < 0) ? -1 : 1;     /* ⅹの正負 */
+                double YDistance = (double)pow(point[i][j].z * point[i][j].z + point[i][j].x * point[i][j].x, 0.5);     /* y軸までの距離 */
+
+                RotateY -= 0.003 * XMark;
+
+                /* 回転させる */
+                point[i][j].z = YDistance * sin(RotateY);
+                point[i][j].x = YDistance * cos(RotateY) * XMark;
+
                 ////* z軸周りに回転 *////
-                double RotateZ = (point[i][j].y == 0) ? PI / 2 * sign(point[i][j].y) : atan((point[i][j].x / abs(point[i][j].y)));    /* 頂点の位置（z軸周りの角度） */
+                double RotateZ = (point[i][j].y == 0) ? PI / 2 * sign(point[i][j].x) : atan((point[i][j].x / abs(point[i][j].y)));    /* 頂点の位置（z軸周りの角度） */
                 int YMark = (point[i][j].y < 0) ? -1 : 1;     /* yの正負 */
                 double ZDistance = (double)pow(point[i][j].x * point[i][j].x + point[i][j].y * point[i][j].y, 0.5);     /* z軸までの距離 */
 
-                RotateZ -= 0.01 * YMark;
+                RotateZ -= 0.011 * YMark;
 
                 /* 回転させる */
 

@@ -10,6 +10,14 @@
 #include "SampleListener.h"
 #include "initializePolygon.h"
 
+GLfloat green[] = { 0.2, 0.8, 0.2, 1.0 };//緑色
+GLfloat green1[] = { 0.25, 0.83, 0.25, 1.0 };//緑色
+GLfloat green2[] = { 0.3, 0.86, 0.3, 1.0 };//緑色
+GLfloat green3[] = { 0.35, 0.89, 0.35, 1.0 };//緑色
+GLfloat green4[] = { 0.4, 0.92, 0.4, 1.0 };//緑色
+GLfloat gray[] = { 0.2, 0.2, 0.2, 1.0 };//灰色
+GLfloat white[] = { 0.8, 0.8, 0.8, 1.0 };//白色
+
 
 /***************************************************
 * 画像の読込
@@ -31,35 +39,45 @@ int ppm_read(const char* filename, unsigned char* pimage) {
 // 大地の描画
 //----------------------------------------------------
 void Ground(void) {
-    double ground_max_x = 60.0;
+    double ground_max_x = 80.0;
     double ground_max_y = 30.0;
-    double ground_max_z = 70.0;
+    double ground_max_z = 100.0;
 
+
+
+    //陰影ON-----------------------------
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);//光源0を利用
+    //-----------------------------------
 
     glBegin(GL_QUADS);
     for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5) {
-        for (double lz = -ground_max_z; lz <= ground_max_z; lz += 5) {
+        for (double lz = -ground_max_z; lz <= 30; lz += 5) {
             
             if (easyMode) {
                 if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, gray);
                     glColor3d(0.7, 0.7, 0.7);  // 大地の色(1)
                 }
                 else {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
                     glColor3d(0.4, 0.4, 0.4);  // 大地の色(2)
                 }
             }
             else {
                 if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
                     glColor3d(0.7, 0.7, 0.9);  // 大地の色(1)
                 }
                 else {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, gray);
                     glColor3d(0.4, 0.4, 0.5);  // 大地の色(2)
                 }
             }
             //glColor3d(1, 1, 1);  // 大地の色(白色)
             //glColor3d(0.52, 0.29, 0.17);  // 大地の色(茶色)
             //glColor3d(0.645, 0.845, 0.268);  // 大地の色(草色)
-            
+            glNormal3f((GLfloat)0, (GLfloat)1, (GLfloat)0);
             glVertex3d(lx, -15.1, lz);
             glVertex3d(lx, -15.1, lz+5);
             glVertex3d(lx+5, -15.1, lz+5);
@@ -68,20 +86,27 @@ void Ground(void) {
         } 
     }
     glEnd();
+    //陰影OFF-----------------------------
+    glDisable(GL_LIGHTING);
+    //-----------------------------------
 
-    //glColor3d(1,1, 1);  // 壁の色(白)
+   
     //glColor3d(1, 1, 1);  // 壁の色(空色)
-    //glBegin(GL_QUADS);
-    //glVertex3d(ground_max_x, ground_max_y, -ground_max_z-0.1);
-    //glVertex3d(ground_max_x, -ground_max_y, -ground_max_z - 0.1);
-    //glVertex3d(-ground_max_x, -ground_max_y, -ground_max_z - 0.1);
-    //glVertex3d(-ground_max_x, ground_max_y, -ground_max_z - 0.1);
-    //glEnd();
+    glBegin(GL_POLYGON);
+    glColor3d(0.8, 0.8, 0.8);  // 壁の色(白)
+    glVertex3d(ground_max_x+20, ground_max_y , -ground_max_z-0.1);
+    glColor3d(0, 0, 0);
+    glVertex3d(ground_max_x + 20, -15, -ground_max_z - 0.1);
+    glColor3d(0, 0, 0);
+    glVertex3d(-ground_max_x - 20, -15, -ground_max_z - 0.1);
+    glColor3d(0.8, 0.8, 0.8);  // 壁の色(白)
+    glVertex3d(-ground_max_x - 20, ground_max_y, -ground_max_z - 0.1);
+    glEnd();
 
-    glRasterPos3i(-ground_max_x-0.99, -15, -ground_max_z);
-    glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
-    glRasterPos3i(0, -15, -ground_max_z);
-    glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
+    //glRasterPos3i(-ground_max_x-0.99, -15, -ground_max_z);
+    //glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
+    //glRasterPos3i(0, -15, -ground_max_z);
+    //glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
     
 
     glColor3d(0, 0, 0);  // 大地の線の色
@@ -134,6 +159,9 @@ void display(void)
     /* shadowCube用の変数 */
     GLfloat color[4] = { 0,0,0,1 };
     Vector normal = {0,0,1};
+    Vector normal2 = { 0,0,1 };
+    Vector normal3 = { 0,0,1 };
+    Vector normal4 = { 0,0,1 };
     GLfloat shadowCube_color[] = { 0.1, 0.1, 0.6, 1.0 };;
 
     glPointSize(10);
@@ -180,30 +208,51 @@ void display(void)
     switch (shape)
     {
     case ball:
+        //陰影ON-----------------------------
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);//光源0を利用
+        //-----------------------------------
         glBegin(GL_QUADS);
         
         for (int i = 1; i < latitudeNUM-1; i++) {
 
             for (int j = 0; j < longitudeNUM; j++) {
+
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+                /*
                 int k = i + j * 2;
                 if ( k % 5 == 0) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
                     glColor3f(0.5,1, 0.1);
                 }
                 else if(k % 5 == 1) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green1);
                     glColor3f(0.5, 0.9, 0.2);
                 }
                 else if (k % 5 == 2) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green2);
                     glColor3f(0.5, 0.80, 0.3);
                 }
                 else if (k % 5 == 3) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green3);
                     glColor3f(0.5, 0.7, 0.4);
                 }
                 else if (k % 5 == 4) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green4);
                     glColor3f(0.5, 0.6, 0.5);
                 }
                 else {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
                     glColor3f(0, 0, 0);
                 }
+                */
+                normal = (point[i][(j + 1) % longitudeNUM] - point[i][j]).cross(point[i + 1][j] - point[i][j]);
+                normal2 = (point[i + 1][(j + 1) % longitudeNUM] - point[i][(j + 1) % longitudeNUM]).cross(point[i][j] - point[i][(j + 1) % longitudeNUM]);
+                normal3 = (point[i + 1][j] - point[i + 1][(j + 1) % longitudeNUM]).cross(point[i][(j + 1) % longitudeNUM] - point[i + 1][(j + 1) % longitudeNUM]);
+                normal4 = (point[i][j] - point[i + 1][j]).cross(point[i + 1][(j + 1) % longitudeNUM] - point[i + 1][j]);
+                normal += normal2 + normal3 + normal4;
+                normal = normal / normal.magnitude();
+                glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
 
                 glVertex3f(point[i][j].x, point[i][j].y, point[i][j].z);
                 glVertex3f(point[i + 1][j].x, point[i + 1][j].y, point[i + 1][j].z);
@@ -212,41 +261,63 @@ void display(void)
             }
         }
         
-        for (int j = 0; j < longitudeNUM; j++) {
-            int k = j * 2;
-            if (k % 5 == 0) {
+        for (int i = 0; i < longitudeNUM; i++) {
+
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+            /*
+            int j = i * 2;
+            if (j % 5 == 0) {
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
                 glColor3f(0.5, 1, 0.1);
             }
-            else if (k % 5 == 1) {
+            else if (j % 5 == 1) {
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green1);
                 glColor3f(0.5, 0.9, 0.2);
             }
-            else if (k % 5 == 2) {
+            else if (j % 5 == 2) {
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green2);
                 glColor3f(0.5, 0.80, 0.3);
             }
-            else if (k % 5 == 3) {
+            else if (j % 5 == 3) {
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green3);
                 glColor3f(0.5, 0.7, 0.4);
             }
-            else if (k % 5 == 4) {
+            else if (j % 5 == 4) {
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green4);
                 glColor3f(0.5, 0.6, 0.5);
             }
             else {
+                glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
                 glColor3f(0, 0, 0);
             }
+            */
+
+            normal = (point[0][0] - point[1][i]).cross(point[1][(i + 1) % longitudeNUM] - point[1][i]);
+            normal = normal / normal.magnitude();
+            glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
 
             glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
-            glVertex3f(point[1][j].x, point[1][j].y, point[1][j].z);
-            glVertex3f(point[1][(j + 1) % longitudeNUM].x, point[1][(j + 1) % longitudeNUM].y, point[1][(j + 1) % longitudeNUM].z);
+            glVertex3f(point[1][i].x, point[1][i].y, point[1][i].z);
+            glVertex3f(point[1][(i + 1) % longitudeNUM].x, point[1][(i + 1) % longitudeNUM].y, point[1][(i + 1) % longitudeNUM].z);
             glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
             
+
+            normal = (point[latitudeNUM - 1][(i + 1) % longitudeNUM] - point[latitudeNUM - 1][i]).cross(point[latitudeNUM][0] - point[latitudeNUM - 1][i]);
+            normal = normal / normal.magnitude();
+            glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
+
             glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
             glVertex3f(point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
-            glVertex3f(point[latitudeNUM-1][j].x, point[latitudeNUM-1][j].y, point[latitudeNUM-1][j].z);
-            glVertex3f(point[latitudeNUM - 1][(j + 1) % longitudeNUM].x, point[latitudeNUM - 1][(j + 1) % longitudeNUM].y, point[latitudeNUM - 1][(j + 1) % longitudeNUM].z);
+            glVertex3f(point[latitudeNUM-1][i].x, point[latitudeNUM-1][i].y, point[latitudeNUM-1][i].z);
+            glVertex3f(point[latitudeNUM - 1][(i + 1) % longitudeNUM].x, point[latitudeNUM - 1][(i + 1) % longitudeNUM].y, point[latitudeNUM - 1][(i + 1) % longitudeNUM].z);
             
             
         }
 
         glEnd();
+        //陰影OFF-----------------------------
+        glDisable(GL_LIGHTING);
+        //-----------------------------------
         break;
     case cube:
         
@@ -338,7 +409,7 @@ void display(void)
         normal = (point[0][0] - point[0][1]).cross(point[0][1] - point[0][2]);
         normal = normal/normal.magnitude();
         glNormal3f((GLfloat)normal.x, (GLfloat)normal.y, (GLfloat)normal.z);
-
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
         glBegin(GL_QUADS);
         glVertex3f(point[0][0].x, point[0][0].y, point[0][0].z);
         glVertex3f(point[0][1].x, point[0][1].y, point[0][1].z);
@@ -502,7 +573,7 @@ void mouseButton(int button, int state, int x, int y)
         {
         case GLUT_LEFT_BUTTON:  /* マウス左ボタンを押した時の処理 */
             PressButton = button;
-            shokika();      /* 初期化 */
+            //shokika();      /* 初期化 */
             break;
 
         case GLUT_MIDDLE_BUTTON:/* マウス中ボタンを押した時の処理 */
@@ -510,7 +581,7 @@ void mouseButton(int button, int state, int x, int y)
 
         case GLUT_RIGHT_BUTTON: /* マウス右ボタンを押した時の処理 */
             PressButton = button;
-            kirikae(1);      /* 切替 */
+            //kirikae(1);      /* 切替 */
             break;
         }
 
@@ -591,7 +662,7 @@ void myInit(char* windowTitle)
     
 
     //光源の設定--------------------------------------
-    GLfloat light_position0[] = { CameraX, CameraY + 10, CameraZ, 1.0 }; //光源0の座標
+    GLfloat light_position0[] = { CameraX+15, CameraY + 10, CameraZ, 1.0 }; //光源0の座標
     glLightfv(GL_LIGHT0, GL_POSITION, light_position0); //光源0を
     GLfloat ambient[] = { 0.7, 0.7, 0.9, 1.0 };
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
@@ -599,14 +670,14 @@ void myInit(char* windowTitle)
     /* イベント発生時に呼び出す関数の登録 */
     glutKeyboardFunc(keyboard);     /* キーボードを押した時 */
     glutMouseFunc(mouseButton);  /* マウスボタンを押した時*/
-    //glutMotionFunc(mouseDrag);    /* マウスドラッグした時 */
+    glutMotionFunc(mouseDrag);    /* マウスドラッグした時 */
     glutDisplayFunc(display);      /* 画面表示 */
     glutTimerFunc(15, timer, 0);    /* タイマーを15ミリ秒後に設定 */
 
     /* CG描画設定 */
     glMatrixMode(GL_PROJECTION);    /* 透視投影(遠近投影法)設定モードに切り替え */
     glLoadIdentity();               /* 透視投影行列を初期化 */
-    gluPerspective(50.0, aspect, 1.0, 100.0);    /* 透視投影行列の設定 */
+    gluPerspective(50.0, aspect, 1.0, 150.0);    /* 透視投影行列の設定 */
       /* 視野角45度, 縦横比 aspect，描画前面までの奥行 1.0，描画背面までの奥行 20.0 */
 
     

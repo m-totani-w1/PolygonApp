@@ -93,12 +93,12 @@ int main(int argc, char** argv)
 
     /* 初期化 */
     glutInit(&argc, argv);  /* OpenGL の初期化 */
-    InitBall();
     myInit(argv[0]);        /* ウインドウ表示と描画設定の初期化 */
 
     /* イベント処理ループ */
     glutMainLoop();
 
+    //InitBall();
     /* プログラム終了 */
     return(0);
 }
