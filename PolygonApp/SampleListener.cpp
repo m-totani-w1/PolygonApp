@@ -54,13 +54,12 @@ void SampleListener::onFrame(const Controller& controller) {
         }
     }
     
-    if (handList.count()) {
+    if (handList.count() == 0) {
         rotateFlag = -1;       
         scaleFlag = -1;    
         deformFlag = -1;
     }
     if (shape == shadowCube) {
-
         autoKaiten();
     }
     for (int i = 0; i < handList.count(); i++) {    // 片手づつ処理を行う
@@ -94,7 +93,8 @@ void SampleListener::onFrame(const Controller& controller) {
         }
     }
 
-    if (handList.count() == 2) {    //両手あるなら
+    if (handList.count() == 2 && !(easyMode)) {    //両手あるなら
+        
         /* 拡大・縮小 */
         kakudai(handList);
         /* 初期化 */
@@ -173,7 +173,7 @@ void henkei(Hand hand) {
     dist = pointer[0].distanceTo(tmpNearestPoint);
    nearestPoint = tmpNearestPoint;
    
-    if (rotateFlag == -1 && scaleFlag == -1 && pick < 4 || deformFlag == I*100+J) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
+    if (rotateFlag == -1 && scaleFlag == -1 && pick < 4 && dist < 2 || deformFlag == I*100+J) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
         if (deformFlag == -1) { printf("Transform Start!!\n"); }
         deformFlag = I * 100 + J;
 
@@ -242,7 +242,7 @@ void henkei(Hand hand) {
         
     }
 
-    if (pick >= 4 && deformFlag == I * 100 + J) {
+    if (pick >= 4 && deformFlag != -1) {
         printf("Transform Finished!!!\n");
         deformFlag = -1;
     }
@@ -257,9 +257,9 @@ void kaiten(Hand hand) {
     double pick = getPick(hand, 1);
     
 
-    if (deformFlag == -1 && scaleFlag == -1 && pick < 4 || rotateFlag == 1) {
+    if (deformFlag == -1 && scaleFlag == -1 && pick < 4 || rotateFlag == 2) {
         if (rotateFlag == -1) { printf("Rotation Start!!!\n"); }
-        rotateFlag = 1;
+        rotateFlag = 2;
         for (int j = 0; j < pointRowNum; j++) {
             for (int k = 0; k < pointColNum; k++) {
                 /* 移動量を計算する */
@@ -330,7 +330,7 @@ void kaiten(Hand hand) {
             }
         }
     }
-    if (pick >= 4 && rotateFlag == 1) {
+    if (pick >= 4 && rotateFlag != -1) {
         rotateFlag = -1;
         printf("Rotation Finished!!\n");
     }
@@ -360,12 +360,9 @@ void kakudai(HandList handList) {
 
     double scale = Rposi1.distanceTo(Lposi1);    //右人差し指と左人差し指の距離
         /* 「手のひらを合わせた」かつ「頂点を動かしていない」かつ「回転してない」時に大きさを調整 */
-    if (scale < 4 && deformFlag == -1 && rotateFlag == -1 || scaleFlag == 1) {
+    if (scale < 4 && deformFlag == -1 && rotateFlag == -1 || scaleFlag == 2) {
         if (scaleFlag == -1) printf("scaling start!!!\n");
-        scaleFlag = 1;
-
-
-
+        scaleFlag = 2;
 
         for (int i = 0; i < pointRowNum; i++) {
             for (int j = 0; j < pointColNum; j++) {
@@ -378,9 +375,7 @@ void kakudai(HandList handList) {
 
     double finishR = Rposi1.distanceTo(Rposi0);     //右人差し指と右親指の距離
     double finishL = Lposi1.distanceTo(Lposi0);     //左人差し指と左親指の距離
-    if (finishR < 4 || finishL < 4) {      //摘まむしぐさでスケーリング終了
-        deformFlag = -1;
-        rotateFlag = -1;
+    if ((finishR < 4 || finishL < 4) && scaleFlag == 2) {      //摘まむしぐさでスケーリング終了
         scaleFlag = -1;
         printf("scaling finished!\n");
     }
@@ -591,9 +586,6 @@ void easyHenkei(Hand hand) {
 
         for (int i = 0; i < pointRowNum; i++) {
             for (int j = 0; j < pointColNum; j++) {
-
-
-
                 /* ポリゴンの形ごとに特殊な処理が必要な場合 */
                 switch (shape) {
                 case ball:
@@ -645,6 +637,7 @@ void easyHenkei(Hand hand) {
 
 
     }
+    
     if(pick > 4 && deformFlag == 1) {
         printf("Transform Finished!!!\n");
         deformFlag = -1;
@@ -655,10 +648,10 @@ void easyKaitenKakudai(Hand hand) {
     
     double pick = getPick(hand,1);
 
-    if (deformFlag == -1 && pick <= 4 || (rotateFlag == -1 && scaleFlag == 2)) {
+    if (deformFlag == -1 && pick <= 4 || (rotateFlag == 1 && scaleFlag == 1)) {
         if (rotateFlag == -1 && scaleFlag == -1) { printf("Rotation and Scaling Start!!!\n"); }
         rotateFlag = 1;
-        scaleFlag = 2;
+        scaleFlag = 1;
         /* 拡大倍率を計算 */
         double scale = 1 + (pointer[1].y - prePointer[1].y) / 30;
         /* 移動量を計算 */
@@ -684,7 +677,7 @@ void easyKaitenKakudai(Hand hand) {
             }
         }
     }
-    if(pick > 4 && rotateFlag == 1 && scaleFlag == 2) {
+    if(pick > 4 && rotateFlag == 1 && scaleFlag == 1) {
         rotateFlag = -1;
         scaleFlag = -1;
         
@@ -740,6 +733,10 @@ void autoKaiten() {
     }
     
 }
+
+/**********************************
+* 手の情報を得る
+**********************************/
 double getPick(Hand hand,int handNum) {
     /********************************************
     * 手の情報を処理
@@ -761,13 +758,13 @@ double getPick(Hand hand,int handNum) {
 
         if (j == 0) {
             posi0 = currentPosition / 8;
-            posi0.y -= 30;
-            posi0.z += 8;
+            posi0.y -= 20;
+            posi0.z += 15;
         }
         else if (j == 1) {
             posi1 = currentPosition / 8;
-            posi1.y -= 30;
-            posi1.z += 8;
+            posi1.y -= 20;
+            posi1.z += 15;
         }
 
         //個別の指の情報を出力する

@@ -10,13 +10,36 @@
 #include "SampleListener.h"
 #include "initializePolygon.h"
 
+double ground_max_x = 80.0;
+double ground_max_y = 30.0;
+double ground_max_z = 100.0;
+
+bool colorFlag[] = { true ,false,false};
+int changingColor = 0;
+
+bool motionFlag = false;
+int motionRange = 100;
+bool motionGetBackground = false; //モーションの光が背景に届いたかどうか
+int backgroundPosition = ground_max_z / 5;
+
+GLfloat background[] = { 0, 0, 0, 1.0 };//背景色
+
 GLfloat green[] = { 0.2, 0.8, 0.2, 1.0 };//緑色
-GLfloat green1[] = { 0.25, 0.83, 0.25, 1.0 };//緑色
-GLfloat green2[] = { 0.3, 0.86, 0.3, 1.0 };//緑色
-GLfloat green3[] = { 0.35, 0.89, 0.35, 1.0 };//緑色
-GLfloat green4[] = { 0.4, 0.92, 0.4, 1.0 };//緑色
+GLfloat blue[] = { 0.2, 0.2, 0.8, 1.0 };//青色
+GLfloat red[] = { 0.8, 0.2, 0.2, 1.0 };//赤色
+GLfloat yellow[] = { 0.8, 0.8, 0.2, 1.0 };//黄色
+
 GLfloat gray[] = { 0.2, 0.2, 0.2, 1.0 };//灰色
+GLfloat white2[] = { 0.4, 0.4, 0.4, 1.0 };//白色2
+GLfloat white1[] = { 0.6, 0.6, 0.6, 1.0 };//白色1
 GLfloat white[] = { 0.8, 0.8, 0.8, 1.0 };//白色
+GLfloat realWhite[] = { 1, 1, 1, 1 };//真っ白
+GLfloat black[] = { 0, 0, 0, 1.0 };//黒色
+
+GLfloat lightOrange[] = { 1, 0.3725, 0.0784, 1.0 };//明るいオレンジ色
+
+
+
 
 
 /***************************************************
@@ -39,9 +62,7 @@ int ppm_read(const char* filename, unsigned char* pimage) {
 // 大地の描画
 //----------------------------------------------------
 void Ground(void) {
-    double ground_max_x = 80.0;
-    double ground_max_y = 30.0;
-    double ground_max_z = 100.0;
+
 
 
 
@@ -49,34 +70,59 @@ void Ground(void) {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);//光源0を利用
     //-----------------------------------
-
+    if (motionFlag && motionRange > (int)pow(pow(ground_max_x, 2) + pow(ground_max_z, 2), 0.5) / 5) {
+        motionRange = 0;
+        /*
+        if (deformFlag != -1 || rotateFlag != -1 || scaleFlag != -1) {
+            motionRange = 0;
+            motionFlag = true;
+        }
+        */
+    }
+    
     glBegin(GL_QUADS);
     for (double lx = -ground_max_x; lx <= ground_max_x; lx += 5) {
         for (double lz = -ground_max_z; lz <= 30; lz += 5) {
-            
             if (easyMode) {
-                if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, gray);
-                    glColor3d(0.7, 0.7, 0.7);  // 大地の色(1)
+                if (motionRange == (int)pow(pow(lx,2) + pow(lz,2),0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, realWhite);
+                }
+                else if (motionRange-1 == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+                }
+                else if (motionRange-2 == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white1);
+                }
+                else if (motionRange-3 == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white2);
+                }
+                else if ((int)(lx + ((int)lz) % 2 + 1) % 2) {                    
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, gray);                    
                 }
                 else {
                     glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
-                    glColor3d(0.4, 0.4, 0.4);  // 大地の色(2)
                 }
             }
             else {
-                if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
+                if (motionRange == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, realWhite);
+                }
+                else if (motionRange - 1 == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+                }
+                else if (motionRange - 2 == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white1);
+                }
+                else if (motionRange - 3 == (int)pow(pow(lx, 2) + pow(lz, 2), 0.5) / 5) {
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white2);
+                }
+                else if ((int)(lx + ((int)lz) % 2 + 1) % 2) {
                     glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-                    glColor3d(0.7, 0.7, 0.9);  // 大地の色(1)
                 }
                 else {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, gray);
-                    glColor3d(0.4, 0.4, 0.5);  // 大地の色(2)
+                    glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
                 }
             }
-            //glColor3d(1, 1, 1);  // 大地の色(白色)
-            //glColor3d(0.52, 0.29, 0.17);  // 大地の色(茶色)
-            //glColor3d(0.645, 0.845, 0.268);  // 大地の色(草色)
             glNormal3f((GLfloat)0, (GLfloat)1, (GLfloat)0);
             glVertex3d(lx, -15.1, lz);
             glVertex3d(lx, -15.1, lz+5);
@@ -86,6 +132,13 @@ void Ground(void) {
         } 
     }
     glEnd();
+
+    if (deformFlag == -1 && rotateFlag == -1 & scaleFlag == -1) {
+        if (motionRange >= backgroundPosition) {
+            motionFlag = false;
+        }
+    }
+    
     //陰影OFF-----------------------------
     glDisable(GL_LIGHTING);
     //-----------------------------------
@@ -94,23 +147,18 @@ void Ground(void) {
     //glColor3d(1, 1, 1);  // 壁の色(空色)
     glBegin(GL_POLYGON);
     glColor3d(0.8, 0.8, 0.8);  // 壁の色(白)
-    glVertex3d(ground_max_x+20, ground_max_y , -ground_max_z-0.1);
-    glColor3d(0, 0, 0);
-    glVertex3d(ground_max_x + 20, -15, -ground_max_z - 0.1);
-    glColor3d(0, 0, 0);
-    glVertex3d(-ground_max_x - 20, -15, -ground_max_z - 0.1);
+    glVertex3d(ground_max_x+60, ground_max_y , -ground_max_z-0.1);
+    glColor3d(background[0], background[1], background[2]);
+    glVertex3d(ground_max_x + 60, -15, -ground_max_z - 0.1);
+    glColor3d(background[0], background[1], background[2]);
+    glVertex3d(-ground_max_x - 60, -15, -ground_max_z - 0.1);
     glColor3d(0.8, 0.8, 0.8);  // 壁の色(白)
-    glVertex3d(-ground_max_x - 20, ground_max_y, -ground_max_z - 0.1);
+    glVertex3d(-ground_max_x - 60, ground_max_y, -ground_max_z - 0.1);
     glEnd();
-
-    //glRasterPos3i(-ground_max_x-0.99, -15, -ground_max_z);
-    //glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
-    //glRasterPos3i(0, -15, -ground_max_z);
-    //glDrawPixels(640, 400, GL_RGB, GL_UNSIGNED_BYTE, &image[0][0][0]);
-    
 
     glColor3d(0, 0, 0);  // 大地の線の色
     glBegin(GL_LINES);
+
     /*地面の罫線*/
     for (double lz = -ground_max_z; lz <= ground_max_z; lz += 5) {
         glVertex3d(-ground_max_x,-15,lz);
@@ -164,43 +212,104 @@ void display(void)
     Vector normal4 = { 0,0,1 };
     GLfloat shadowCube_color[] = { 0.1, 0.1, 0.6, 1.0 };;
 
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    double dist = nearestPoint.distanceTo(pointer[0]);
-    double c = -dist *(0.1)  + 1;
+    //陰影ON-----------------------------
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);//光源0を利用
+    //-----------------------------------
+
+    /* ポインターの表示 */
     if (deformFlag != -1) {
-        glColor3f(c,0 , 1);
-        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
-        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
+        
+        glTranslatef(pointer[0].x, pointer[0].y, pointer[0].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[0].x, -pointer[0].y, -pointer[0].z);
+        
+        glTranslatef(pointer[1].x, pointer[1].y, pointer[1].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, yellow);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[1].x, -pointer[1].y, -pointer[1].z);
+    }
+    else if (rotateFlag != -1 && scaleFlag != -1) {
+        
+        glTranslatef(pointer[0].x, pointer[0].y, pointer[0].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[0].x, -pointer[0].y, -pointer[0].z);
+        
+        glTranslatef(pointer[1].x, pointer[1].y, pointer[1].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[1].x, -pointer[1].y, -pointer[1].z);
     }
     else if (rotateFlag != -1) {
-        glColor3f(0, 1, 1);
-        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
-        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
+        
+        glTranslatef(pointer[0].x, pointer[0].y, pointer[0].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[0].x, -pointer[0].y, -pointer[0].z);
+        
+        glTranslatef(pointer[1].x, pointer[1].y, pointer[1].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[1].x, -pointer[1].y, -pointer[1].z);
     }
     else if (scaleFlag != -1) {
-        glColor3f(1, 1, 1);
-        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
-        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
+        
+        glTranslatef(pointer[0].x, pointer[0].y, pointer[0].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[0].x, -pointer[0].y, -pointer[0].z);
+        
+        glTranslatef(pointer[1].x, pointer[1].y, pointer[1].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[1].x, -pointer[1].y, -pointer[1].z);
     }
     else {
-        glColor3f(0, 0, 0);
-        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
-        glVertex3f(pointer[1].x, pointer[1].y, pointer[1].z);
+        glTranslatef(pointer[0].x, pointer[0].y, pointer[0].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[0].x, -pointer[0].y, -pointer[0].z);
+        
+        glTranslatef(pointer[1].x, pointer[1].y, pointer[1].z);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, yellow);
+        glutSolidSphere(0.3, 16, 16);
+        glTranslatef(-pointer[1].x, -pointer[1].y, -pointer[1].z);
+    }
+    
+    /* ポインターと近い頂点の表示 */
+
+    double dist = nearestPoint.distanceTo(pointer[0]);
+    if (dist > 0.1) {
+        if (dist < 2) {
+            glTranslatef(nearestPoint.x, nearestPoint.y, nearestPoint.z);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
+            glutSolidSphere(0.3, 16, 16);
+            glTranslatef(-nearestPoint.x, -nearestPoint.y, -nearestPoint.z);
+        }
+        else {
+            glTranslatef(nearestPoint.x, nearestPoint.y, nearestPoint.z);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
+            glutSolidSphere(0.3, 16, 16);
+            glTranslatef(-nearestPoint.x, -nearestPoint.y, -nearestPoint.z);
+        }
     }
     
     
-    glEnd();
-
-    if (dist < 10) {
-        glColor3f(1, 0, 0);
-        glPointSize(20);
-        glBegin(GL_POINTS);
+    //陰影OFF-----------------------------
+    glDisable(GL_LIGHTING);
+    //-----------------------------------
+    /* ポインターと近い頂点を結ぶ線 */
+    if ((!easyMode) && dist < 2) {
+        glLineWidth((GLfloat)5);
+        glColor3f(0.8, 0.2, 0.2);
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(pointer[0].x, pointer[0].y, pointer[0].z);
         glVertex3f(nearestPoint.x, nearestPoint.y, nearestPoint.z);
         glEnd();
+        glLineWidth((GLfloat)1);
     }
-    
-    
     
    
     /* ポリゴンの描画  */
@@ -219,33 +328,7 @@ void display(void)
             for (int j = 0; j < longitudeNUM; j++) {
 
                 glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-                /*
-                int k = i + j * 2;
-                if ( k % 5 == 0) {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-                    glColor3f(0.5,1, 0.1);
-                }
-                else if(k % 5 == 1) {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green1);
-                    glColor3f(0.5, 0.9, 0.2);
-                }
-                else if (k % 5 == 2) {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green2);
-                    glColor3f(0.5, 0.80, 0.3);
-                }
-                else if (k % 5 == 3) {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green3);
-                    glColor3f(0.5, 0.7, 0.4);
-                }
-                else if (k % 5 == 4) {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green4);
-                    glColor3f(0.5, 0.6, 0.5);
-                }
-                else {
-                    glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-                    glColor3f(0, 0, 0);
-                }
-                */
+                
                 normal = (point[i][(j + 1) % longitudeNUM] - point[i][j]).cross(point[i + 1][j] - point[i][j]);
                 normal2 = (point[i + 1][(j + 1) % longitudeNUM] - point[i][(j + 1) % longitudeNUM]).cross(point[i][j] - point[i][(j + 1) % longitudeNUM]);
                 normal3 = (point[i + 1][j] - point[i + 1][(j + 1) % longitudeNUM]).cross(point[i][(j + 1) % longitudeNUM] - point[i + 1][(j + 1) % longitudeNUM]);
@@ -264,33 +347,7 @@ void display(void)
         for (int i = 0; i < longitudeNUM; i++) {
 
             glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-            /*
-            int j = i * 2;
-            if (j % 5 == 0) {
-                glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-                glColor3f(0.5, 1, 0.1);
-            }
-            else if (j % 5 == 1) {
-                glMaterialfv(GL_FRONT, GL_DIFFUSE, green1);
-                glColor3f(0.5, 0.9, 0.2);
-            }
-            else if (j % 5 == 2) {
-                glMaterialfv(GL_FRONT, GL_DIFFUSE, green2);
-                glColor3f(0.5, 0.80, 0.3);
-            }
-            else if (j % 5 == 3) {
-                glMaterialfv(GL_FRONT, GL_DIFFUSE, green3);
-                glColor3f(0.5, 0.7, 0.4);
-            }
-            else if (j % 5 == 4) {
-                glMaterialfv(GL_FRONT, GL_DIFFUSE, green4);
-                glColor3f(0.5, 0.6, 0.5);
-            }
-            else {
-                glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-                glColor3f(0, 0, 0);
-            }
-            */
+            
 
             normal = (point[0][0] - point[1][i]).cross(point[1][(i + 1) % longitudeNUM] - point[1][i]);
             normal = normal / normal.magnitude();
@@ -395,15 +452,6 @@ void display(void)
         //-----------------------------------
         
         
-        //glPushMatrix();                /* 描画位置を保存 */
-        //glColor3f(0.0, 1.0, 0.0);       /* 描画色を白にする */
-        //glTranslatef(10.0, 0.0, -10.0);    /* 描画位置をX方向に1.0移動 */
-        //glRotatef(BoxRotate, RotateAxis.x, RotateAxis.y, RotateAxis.z);   /* BoxRotate(度)回転 */
-        //glutSolidCube(length);         /* 立方体を描画 */
-        //glPopMatrix();                 /* 描画位置を戻す */
-
-        
-        //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, shadowCube_color);
         /*　上面　*/
         /* 垂線の計算 */
         normal = (point[0][0] - point[0][1]).cross(point[0][1] - point[0][2]);
@@ -487,11 +535,64 @@ void display(void)
 ***********************************************************/
 void timer(int timerID)
 {
+    motionRange++;
     /* 次のタイマーを15ミリ秒後に設定 */
-    glutTimerFunc(15, timer, 0);
+    glutTimerFunc(20, timer, 0);
 
     /* オブジェクトの回転角度を1.0度ずつ増加させる */
     BoxRotate += 1;
+
+    /* 背景の色を変える */
+    if (motionRange == backgroundPosition && false) {
+        motionGetBackground = true;
+        background[0] = 0;
+        background[1] = 0;
+        background[2] = 0;
+    }
+    if (false) {
+        if (motionRange - backgroundPosition < 25) {
+            background[0] += lightOrange[0] / 50;
+            background[1] += lightOrange[1] / 50;
+            background[2] += lightOrange[2] / 50;
+        }
+        else if (motionRange - backgroundPosition < 50) {
+            background[0] -= lightOrange[0] / 50;
+            background[1] -= lightOrange[1] / 50;
+            background[2] -= lightOrange[2] / 50;
+        }
+        else {
+            motionGetBackground = false;
+        }
+    }
+    else{
+        if(colorFlag[changingColor]) {
+            if (background[changingColor] < 0.1) {
+                background[changingColor] += 0.001;
+            }
+            else {
+                colorFlag[changingColor] = false;
+            }
+        }
+    else {
+        if (background[changingColor] > 0.01) {
+            background[changingColor] -= 0.001;
+        }
+        else {
+            changingColor = (changingColor + 1) % 3;
+            colorFlag[changingColor] = true;
+        }
+    }
+    }
+
+    
+    
+    
+    
+
+    
+
+    
+    
     
     
     if (BoxRotate > 360.0) BoxRotate -= 360.0;
@@ -521,22 +622,28 @@ void keyboard(unsigned char key, int x, int y)
         }
         else {
             easyMode = true;
+            nearestPoint = { 100,100,100 };
         }
         break;
     case 'i':
         shokika();      /* 初期化 */
+        motionFlag = true;
         break;
     case 's':
         kirikae(1);      /* 切替 */
+        motionFlag = true;
         break;
     case 'h':
         InitHexagon();
+        motionFlag = true;
         break;
     case 'c':
         InitCube();
+        motionFlag = true;
         break;
     case 'b':
         InitBall();
+        motionFlag = true;
         break;
     case 'q':
         exit(0);      /* プログラム終了 */
@@ -638,6 +745,7 @@ void mouseDrag(int x, int y)
 
 
 
+
 /***********************************************************
 |  関数：myInit()
 |  説明：ウインドウ表示と描画設定の初期化
@@ -647,8 +755,8 @@ void mouseDrag(int x, int y)
 void myInit(char* windowTitle)
 {
     /* ウインドウのサイズ */
-    int winWidth = 800;
-    int winHeight = 600;
+    int winWidth = 1260;
+    int winHeight = 640;
     /* ウインドウの縦横の比を計算 */
     float aspect = (float)winWidth / (float)winHeight;
 
