@@ -1,12 +1,19 @@
 #include "initializePolygon.h"
-#include "Header.h"
-/*********************************************************
-*
-*   球
-*
-**********************************************************/
+#include "CommonVariables.h"
 
+
+/***********************************************************
+|  関数：InitBall()
+|  説明：初期化関数（ボール）
+|  引数：無し
+|  戻値：無し
+***********************************************************/
 void InitBall() {
+
+    const int latitudeNUM = 16;         /* 緯度方向の分割数 */
+    const int longitudeNUM = 20;        /* 経度方向の分割数 */
+    const double radiusBall = 8;                    /* 球の半径 */
+
     /*以前の座標の消去*/
     clearPoint();
 
@@ -27,6 +34,7 @@ void InitBall() {
     point[0][0].y = radiusBall * sin(theta);
     point[0][0].z = radiusBall * cos(theta) * sin(omega);
     printf("pole[0](x:%2.4f,y:%2.4f,z:%2.4f)\n", point[0][0].x, point[0][0].y, point[0][0].z);
+    
     theta = PI / 2;
     omega = 0;
     point[latitudeNUM][0].x = radiusBall * cos(theta) * cos(omega);
@@ -34,6 +42,7 @@ void InitBall() {
     point[latitudeNUM][0].z = radiusBall * cos(theta) * sin(omega);
     printf("pole[1](x:%2.4f,y:%2.4f,z:%2.4f)\n", point[latitudeNUM][0].x, point[latitudeNUM][0].y, point[latitudeNUM][0].z);
 
+    /* 極以外の座標 */
     theta = -PI / 2;
     for (int i = 1; i < latitudeNUM; i++) {
         theta += Dtheta;
@@ -50,14 +59,15 @@ void InitBall() {
     }
 }
 
-/*********************************************************
-*
-*   立方体
-*
-**********************************************************/
-
-
+/***********************************************************
+|  関数：InitCube()
+|  説明：初期化関数（立方体）
+|  引数：無し
+|  戻値：無し
+***********************************************************/
 void InitCube() {
+    const double length = 10;
+
     /*以前の座標の消去*/
     clearPoint();
 
@@ -66,7 +76,7 @@ void InitCube() {
     pointRowNum = 2;
     pointColNum = 4;
 
-    /**/
+    /* 座標計算 */
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
             for (int k = 0; k < 2; k++) {
@@ -80,14 +90,15 @@ void InitCube() {
     }
 }
 
-/*********************************************************
-*
-*   六角形
-*
-**********************************************************/
-
-
+/***********************************************************
+|  関数：InitHexagon()
+|  説明：初期化関数（六角形）
+|  引数：無し
+|  戻値：無し
+***********************************************************/
 void InitHexagon() {
+    const double radiusHexagon = 6;
+
     /*以前の座標の消去*/
     clearPoint();
 
@@ -96,7 +107,7 @@ void InitHexagon() {
     pointRowNum = 1;
     pointColNum = 6;
 
-    /**/
+    /*　座標計算　*/
     for (int i = 0; i < 6; i++) {
         point[0][i].x = radiusHexagon * cos(i * (2 * PI / 6));
         point[0][i].y = radiusHexagon * sin(i * (2 * PI / 6));
@@ -106,13 +117,17 @@ void InitHexagon() {
     }
 }
 
-/*********************************************************
-*
-*   陰影立方体
-*
-**********************************************************/
-
+/***********************************************************
+|  関数：InitShadowCube()
+|  説明：初期化関数（陰影立方体）
+|  引数：無し
+|  戻値：無し
+***********************************************************/
 void InitShadowCube() {
+    const double length = 10;
+    double lengthS = 10;
+    Vector RotateAxis = { 1,0,1 };
+
     clearPoint();
 
     shape = shadowCube;
@@ -121,7 +136,7 @@ void InitShadowCube() {
     pointRowNum = 2;
     pointColNum = 4;
 
-    /**/
+    /*　座標計算　*/
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 4; j++) {
             point[i][j].y = length / 2 * ((i == 0) ? 1 : -1);
@@ -132,6 +147,13 @@ void InitShadowCube() {
     }
 
 }
+
+/***********************************************************
+|  関数：clearPoint()
+|  説明：頂点の状態を削除する関数
+|  引数：無し
+|  戻値：無し
+***********************************************************/
 void clearPoint() {
     for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 20; j++) {

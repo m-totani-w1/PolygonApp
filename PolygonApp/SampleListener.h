@@ -1,6 +1,6 @@
-#pragma once
+
 #include "Leap.h"
-#include "Header.h"
+#include "CommonVariables.h"
 
 #ifndef SL_H
 #define SL_H
@@ -18,7 +18,6 @@ public:
 
 #endif // !SL_H
 
-//必要だろうか。。。？
 extern Controller controller;
 extern SampleListener listener;
 extern Screen screen;
@@ -27,15 +26,16 @@ void CleanupExit();
 void henkei(Hand hand);
 void kaiten(Hand hand);
 void kakudai(HandList handList);
-void shokika(HandList handList);
+void shokika();
+void kirikae();
 
-void kirikae(HandList handList);
-
-double getPick(Hand hand,int handNum);
+double getPick(Hand hand);
 
 /* 簡単モード */
 void easyHenkei(Hand hand);
 void easyKaitenKakudai(Hand hand);
 void autoKaiten();
-void shokika();
-void kirikae(int i);
+
+/* グローバル変数の更新 */
+double udateNearestPoint(int* I, int* J);
+void updatePrePoint();

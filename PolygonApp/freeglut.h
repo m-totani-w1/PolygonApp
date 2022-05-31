@@ -1,4 +1,3 @@
-#pragma once
 /* 関数のプロトタイプ宣言 */
 void display(void);
 void timer(int timerID);
