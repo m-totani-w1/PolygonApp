@@ -65,7 +65,7 @@ void Ground(void) {
 
 
 
-
+    /*大地の描写*/
     //陰影ON-----------------------------
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);//光源0を利用
@@ -143,6 +143,8 @@ void Ground(void) {
     glDisable(GL_LIGHTING);
     //-----------------------------------
 
+
+    /* 壁の色 */
    
     //glColor3d(1, 1, 1);  // 壁の色(空色)
     glBegin(GL_POLYGON);
@@ -285,13 +287,13 @@ void display(void)
         if (dist < 2) {
             glTranslatef(nearestPoint.x, nearestPoint.y, nearestPoint.z);
             glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
-            glutSolidSphere(0.3, 16, 16);
+            glutSolidSphere(0.5, 16, 16);
             glTranslatef(-nearestPoint.x, -nearestPoint.y, -nearestPoint.z);
         }
         else {
             glTranslatef(nearestPoint.x, nearestPoint.y, nearestPoint.z);
             glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
-            glutSolidSphere(0.3, 16, 16);
+            glutSolidSphere(0.5, 16, 16);
             glTranslatef(-nearestPoint.x, -nearestPoint.y, -nearestPoint.z);
         }
     }
@@ -793,6 +795,6 @@ void myInit(char* windowTitle)
     glEnable(GL_DEPTH_TEST);        /* 隠面消去を有効にする */
 
     /* 画像の読込 */
-    ppm_read("universe.ppm", &image[0][0][0]);
+    //ppm_read("universe.ppm", &image[0][0][0]);
 }
 
