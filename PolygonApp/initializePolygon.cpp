@@ -17,7 +17,7 @@ void InitBall() {
     /*以前の座標の消去*/
     clearPoint();
 
-    shape = ball;
+    SHAPE = BALL;
     /* 頂点の個数を更新*/
     pointRowNum = latitudeNUM+1;
     pointColNum = longitudeNUM;
@@ -71,7 +71,7 @@ void InitCube() {
     /*以前の座標の消去*/
     clearPoint();
 
-    shape = cube;
+    SHAPE = CUBE;
     /* 頂点の個数を更新*/
     pointRowNum = 2;
     pointColNum = 4;
@@ -102,7 +102,7 @@ void InitHexagon() {
     /*以前の座標の消去*/
     clearPoint();
 
-    shape = hexagon;
+    SHAPE = HEXAGON;
     /* 頂点の個数を更新*/
     pointRowNum = 1;
     pointColNum = 6;
@@ -130,7 +130,7 @@ void InitShadowCube() {
 
     clearPoint();
 
-    shape = shadowCube;
+    SHAPE = SHADOWCUBE;
 
     /* 頂点の個数を更新*/
     pointRowNum = 2;

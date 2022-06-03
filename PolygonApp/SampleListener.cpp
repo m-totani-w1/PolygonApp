@@ -34,7 +34,7 @@ void SampleListener::onFrame(const Controller& controller) {
     
 
     //ポリゴンが陰影立方体ならば、自動回転指せる
-    if (shape == shadowCube) {
+    if (SHAPE == SHADOWCUBE) {
         autoKaiten();
     }
 
@@ -116,8 +116,7 @@ void CleanupExit() {
 void henkei(Hand hand) {
     double pick = getPick(hand);
     int I, J;
-    double dist;
-    dist = updateNearestPoint(&I,&J);
+    double dist = updateNearestPoint(&I,&J);
     
     if (!rotateFlag && !scaleFlag && pick < 4 && dist < 2 || deformFlag) {//どの点も変形中でない(-1)、または自身が変形中(j * 100 + k)
         if (!deformFlag) { printf("Transform Start!!\n"); }
@@ -131,9 +130,9 @@ void henkei(Hand hand) {
 
 
         /* ポリゴンの形ごとに特殊な処理が必要な場合 */
-        switch (shape) {
+        switch (SHAPE) {
 
-        case ball:
+        case BALL:
             /* 摘まんだ点の周辺も動かす */
             double TFrate;
             TFrate = point[I][J].distanceTo(prePoint[I][J]);       //摘まんだ点の変化に合わせて、周囲の点の変化率を変える
@@ -172,10 +171,10 @@ void henkei(Hand hand) {
             }
             break;
 
-        case cube:
+        case CUBE:
             break;
 
-        case hexagon:
+        case HEXAGON:
             break;
         default:
             break;
@@ -326,18 +325,18 @@ void shokika() {
 
         printf("initialize!!!");
 
-        switch (shape)
+        switch (SHAPE)
         {
-        case ball:
+        case BALL:
             InitBall();
             break;
-        case cube:
+        case CUBE:
             InitCube();
             break;
-        case hexagon:
+        case HEXAGON:
             InitHexagon();
             break;
-        case shadowCube:
+        case SHADOWCUBE:
             InitShadowCube();
             break;
         default:
@@ -358,18 +357,18 @@ void kirikae() {
     if (!deformFlag&& !rotateFlag && !scaleFlag) { //どの操作もしていないなら
         printf("switch!!!");
         
-        switch (shape)
+        switch (SHAPE)
         {
-        case ball:
+        case BALL:
             InitShadowCube();
             break;
-        case shadowCube:
+        case SHADOWCUBE:
             InitCube();
             break;
-        case cube:
+        case CUBE:
             InitHexagon();
             break;
-        case hexagon:
+        case HEXAGON:
             InitBall();
             break;
         default:
@@ -401,21 +400,21 @@ void easyHenkei(Hand hand) {
         for (int i = 0; i < pointRowNum; i++) {
             for (int j = 0; j < pointColNum; j++) {
                 /* ポリゴンの形ごとに特殊な処理が必要な場合 */
-                switch (shape) {
-                case ball:
+                switch (SHAPE) {
+                case BALL:
                     /* スパイクするように点を動かす */
                     if ((i + j + 1) % 2 == 0 && (i + 1) % 2 == 0) {
 
                         point[i][j] = prePoint[i][j] * scale;
                     }
                     break;
-                case cube:
+                case CUBE:
                     /* つぶれるように点を動かす */
                     point[i][j].x = prePoint[i][j].x * scale;
                     point[i][j].z = prePoint[i][j].z * scale;
                     point[i][j].y = prePoint[i][j].y / (scale);
                     break;
-                case hexagon:
+                case HEXAGON:
 
                     if (j % 2) {
                         point[i][j].x = prePoint[i][j].x * scale;
@@ -426,7 +425,7 @@ void easyHenkei(Hand hand) {
                         point[i][j].y = prePoint[i][j].y / scale;
                     }
                     break;
-                case shadowCube:
+                case SHADOWCUBE:
                     /* つぶれるように点を動かす */
                     point[i][j].x = prePoint[i][j].x / scale;
                     point[i][j].z = prePoint[i][j].z * scale;

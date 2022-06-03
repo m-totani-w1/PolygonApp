@@ -25,4 +25,4 @@ Vector point[20][20] = {};      /* 頂点の座標 */
 Vector prePoint[20][20] = {};   /* 以前の頂点の座標 */
 int pointRowNum = 0;          /* 頂点の数（行） */
 int pointColNum = 0;            /* 頂点の数（列） */
-polygon shape;      /* polygonの形 */
+polygon SHAPE;      /* polygonの形 */

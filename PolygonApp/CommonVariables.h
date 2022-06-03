@@ -10,8 +10,8 @@ extern Vector point[20][20];      /* 頂点の座標 */
 extern Vector prePoint[20][20];   /* 以前の頂点の座標 */
 extern int pointRowNum;          /* 頂点の数（行） */
 extern int pointColNum;            /* 頂点の数（列） */
-enum polygon { ball, cube, hexagon, shadowCube };
-extern polygon shape;      /* polygonの形 */
+enum polygon { BALL, CUBE, HEXAGON, SHADOWCUBE };
+extern polygon SHAPE;      /* polygonの形 */
 
 extern Vector pointer[2];   /* 変形させる際のポインターの位置 */
 extern Vector prePointer[2];        /* 1つ前のポインターの位置 */

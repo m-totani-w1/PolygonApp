@@ -305,9 +305,9 @@ void drawPolygon(void) {
     Vector normal4 = { 0,0,1 };
     GLfloat shadowCube_color[] = { 0.1, 0.1, 0.6, 1.0 };
 
-    switch (shape)
+    switch (SHAPE)
     {
-    case ball:
+    case BALL:
         //陰影ON-----------------------------
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);//光源0を利用
@@ -370,7 +370,7 @@ void drawPolygon(void) {
         glDisable(GL_LIGHTING);
         //-----------------------------------
         break;
-    case cube:
+    case CUBE:
 
         glBegin(GL_QUADS);
 
@@ -418,7 +418,7 @@ void drawPolygon(void) {
         glEnd();
         break;
 
-    case hexagon:
+    case HEXAGON:
 
         
 
@@ -438,7 +438,7 @@ void drawPolygon(void) {
         glLineWidth(1);
 
         break;
-    case shadowCube:
+    case SHADOWCUBE:
         //陰影ON-----------------------------
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);//光源0を利用

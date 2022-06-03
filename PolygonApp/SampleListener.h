@@ -37,5 +37,5 @@ void easyKaitenKakudai(Hand hand);
 void autoKaiten();
 
 /* グローバル変数の更新 */
-double udateNearestPoint(int* I, int* J);
+double updateNearestPoint(int* I, int* J);
 void updatePrePoint();
